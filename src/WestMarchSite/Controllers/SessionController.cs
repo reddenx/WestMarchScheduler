@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WestMarchSite.Application;
+using WestMarchSite.Infrastructure;
 
 namespace WestMarchSite.Controllers
 {
@@ -17,12 +18,12 @@ namespace WestMarchSite.Controllers
             _sessionService = sessionService;
         }
 
-        [HttpPost("{key}")]
+        [HttpPost("")]
         [ProducesResponseType(200, Type = typeof(CreateSessionResultDto))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult CreateSession([FromRoute]string key, [FromBody]CreateSessionDto create)
+        public IActionResult CreateSession([FromBody]CreateSessionDto create)
         {
             throw new NotImplementedException();
         }

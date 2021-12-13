@@ -3,21 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WestMarchSite.Application
+namespace WestMarchSite.Infrastructure
 {
-    public interface ISessionService
-    {
-        CreateSessionResultDto StartSession(string leadKey, CreateSessionDto createDto);
-        ApproveSessionResultDto DmApproveSession(string dmKey, ApproveSessionDto approvalDto);
-        LeadScheduleResultDto LeadNarrowsSchedule(string leadKey, LeadScheduleDto leadScheduleDto);
-        bool PlayerJoinSession(string playerKey, PlayerJoinDto playerDto);
-        bool DmFinalizes(string dmKey);
-
-        SessionDto GetPlayerSession(string playerKey);
-        SessionDto GetDmSession(string dmKey);
-        SessionDto GetLeadSession(string leadKey);
-    }
-
     public class CreateSessionDto
     {
         public string Name { get; set; }
@@ -121,5 +108,4 @@ namespace WestMarchSite.Application
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
     }
-
 }
