@@ -24,10 +24,12 @@ namespace WestMarchSite.Application
     public class SessionService : ISessionService
     {
         private readonly ISessionRepository _repo;
+        private readonly ISiteLogger _logger;
 
-        public SessionService(ISessionRepository repo)
+        public SessionService(ISessionRepository repo, ISiteLogger logger)
         {
             _repo = repo;
+            _logger = logger;
         }
 
         public SetResult<CreateSessionResultDto> StartSession(string leadKey, CreateSessionDto createDto)

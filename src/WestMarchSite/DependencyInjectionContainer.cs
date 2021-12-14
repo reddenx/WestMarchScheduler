@@ -10,6 +10,7 @@ namespace WestMarchSite
     public static class DependencyInjectionContainer
     {
         public static void SetupDiContainer(this IServiceCollection services, IConfiguration config)
-        { }
+        {
+        }
     }
 }
