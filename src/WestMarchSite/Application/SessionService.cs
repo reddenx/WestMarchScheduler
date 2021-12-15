@@ -24,12 +24,10 @@ namespace WestMarchSite.Application
     public class SessionService : ISessionService
     {
         private readonly ISessionRepository _repo;
-        private readonly ISiteLogger _logger;
 
-        public SessionService(ISessionRepository repo, ISiteLogger logger)
+        public SessionService(ISessionRepository repo)
         {
             _repo = repo;
-            _logger = logger;
         }
 
         public SetResult<CreateSessionResultDto> StartSession(CreateSessionDto createDto)
@@ -38,7 +36,7 @@ namespace WestMarchSite.Application
 
             newSession.SetInfo(createDto.Title, createDto.Description);
             newSession.SetLead(createDto.Name);
-            //newSession.UpdateState(SessionStates.UnApproved);
+            newSession.ProgressState();
 
             if (!newSession.IsValid)
             {
@@ -48,7 +46,7 @@ namespace WestMarchSite.Application
             var saveResult = _repo.Save(newSession);
             if (!saveResult.IsSuccess)
             {
-                return new SetResult<CreateSessionResultDto>(Translate(saveResult.Error.Value));
+                return new SetResult<CreateSessionResultDto>(ToApp(saveResult.Error.Value));
             }
 
             var dto = new CreateSessionResultDto()
@@ -65,14 +63,14 @@ namespace WestMarchSite.Application
             var sessionGetResult = _repo.GetSessionHostKey(hostKey);
             if (!sessionGetResult.IsSuccess)
             {
-                return new SetResult<ApproveSessionResultDto>(Translate(sessionGetResult.Error.Value));
+                return new SetResult<ApproveSessionResultDto>(ToApp(sessionGetResult.Error.Value));
             }
 
             var session = sessionGetResult.Result;
 
             session.SetHost(approvalDto.Name);
-            session.SetHostSchedule(TranslateSchedule(approvalDto.Schedule));
-            //session.UpdateState(SessionStates.Approved);
+            session.SetHostSchedule(ToCore(approvalDto.Schedule));
+            session.ProgressState();
 
             if (!session.IsValid)
             {
@@ -82,7 +80,7 @@ namespace WestMarchSite.Application
             var saveResult = _repo.Save(session);
             if (!saveResult.IsSuccess)
             {
-                return new SetResult<ApproveSessionResultDto>(Translate(saveResult.Error.Value));
+                return new SetResult<ApproveSessionResultDto>(ToApp(saveResult.Error.Value));
             }
 
             return new SetResult<ApproveSessionResultDto>(new ApproveSessionResultDto
@@ -96,13 +94,13 @@ namespace WestMarchSite.Application
             var sessionGetResult = _repo.GetSessionLeadKey(leadKey);
             if (!sessionGetResult.IsSuccess)
             {
-                return new SetResult<LeadScheduleResultDto>(Translate(sessionGetResult.Error.Value));
+                return new SetResult<LeadScheduleResultDto>(ToApp(sessionGetResult.Error.Value));
             }
 
             var session = sessionGetResult.Result;
 
-            session.SetLeadSchedule(TranslateSchedule(leadScheduleDto.Schedule));
-            //session.UpdateState(SessionStates.Open);
+            session.SetLeadSchedule(ToCore(leadScheduleDto.Schedule));
+            session.ProgressState();
 
             if (!session.IsValid)
             {
@@ -112,7 +110,7 @@ namespace WestMarchSite.Application
             var saveResult = _repo.Save(session);
             if (!saveResult.IsSuccess)
             {
-                return new SetResult<LeadScheduleResultDto>(Translate(saveResult.Error.Value));
+                return new SetResult<LeadScheduleResultDto>(ToApp(saveResult.Error.Value));
             }
 
             return new SetResult<LeadScheduleResultDto>(new LeadScheduleResultDto
@@ -128,12 +126,12 @@ namespace WestMarchSite.Application
             var sessionGetResult = _repo.GetSessionPlayerKey(playerKey);
             if (!sessionGetResult.IsSuccess)
             {
-                return new SetResult<bool>(Translate(sessionGetResult.Error.Value));
+                return new SetResult<bool>(ToApp(sessionGetResult.Error.Value));
             }
 
             var session = sessionGetResult.Result;
 
-            session.AddPlayer(playerDto.Name, TranslateSchedule(playerDto.Schedule));
+            session.AddPlayer(playerDto.Name, ToCore(playerDto.Schedule));
 
             if (!session.IsValid)
             {
@@ -143,7 +141,7 @@ namespace WestMarchSite.Application
             var saveResult = _repo.Save(session);
             if (!saveResult.IsSuccess)
             {
-                return new SetResult(Translate(saveResult.Error.Value));
+                return new SetResult(ToApp(saveResult.Error.Value));
             }
 
             return new SetResult();
@@ -154,15 +152,13 @@ namespace WestMarchSite.Application
             var sessionGetResult = _repo.GetSessionHostKey(hostKey);
             if (!sessionGetResult.IsSuccess)
             {
-                return new SetResult<bool>(Translate(sessionGetResult.Error.Value));
+                return new SetResult<bool>(ToApp(sessionGetResult.Error.Value));
             }
 
             var session = sessionGetResult.Result;
 
-
-            session.SetFinalSchedule(finalizeDto);
-            session.Finalize();
-
+            session.SetFinalSchedule(ToCore(finalizeDto.Schedule));
+            session.ProgressState();
 
             if (!session.IsValid)
             {
@@ -172,12 +168,11 @@ namespace WestMarchSite.Application
             var saveResult = _repo.Save(session);
             if (!saveResult.IsSuccess)
             {
-                return new SetResult(Translate(saveResult.Error.Value));
+                return new SetResult(ToApp(saveResult.Error.Value));
             }
 
             return new SetResult();
         }
-
 
 
         public FetchResult<SessionDto> GetHostSession(string hostKey)
@@ -185,7 +180,7 @@ namespace WestMarchSite.Application
             try
             {
                 var sessionResult = _repo.GetSessionHostKey(hostKey);
-                return TranslateGet(sessionResult);
+                return ToDto(sessionResult);
             }
             catch
             {
@@ -198,7 +193,7 @@ namespace WestMarchSite.Application
             try
             {
                 var sessionResult = _repo.GetSessionLeadKey(leadKey);
-                return TranslateGet(sessionResult);
+                return ToDto(sessionResult);
             }
             catch
             {
@@ -211,7 +206,7 @@ namespace WestMarchSite.Application
             try
             {
                 var sessionResult = _repo.GetSessionPlayerKey(playerKey);
-                return TranslateGet(sessionResult);
+                return ToDto(sessionResult);
             }
             catch
             {
@@ -220,7 +215,9 @@ namespace WestMarchSite.Application
         }
 
 
-        private SetResultErrors Translate(SessionRepository.QueryResultErrors error)
+        #region Mappings
+
+        private SetResultErrors ToApp(SessionRepository.QueryResultErrors error)
         {
             switch (error)
             {
@@ -233,12 +230,15 @@ namespace WestMarchSite.Application
             }
         }
 
-        private SessionSchedule[] TranslateSchedule(SessionScheduleDateDto[] schedule)
+        private SessionSchedule ToCore(SessionScheduleDateDto[] schedule)
         {
-            throw new NotImplementedException();
+            return new SessionSchedule(
+                options: schedule
+                    .Select(s => new SessionScheduleOption(s.Start, s.End)
+                ).ToArray());
         }
 
-        private FetchResult<SessionDto> TranslateGet(SessionRepository.QueryResult<SessionEntity> sessionResult)
+        private FetchResult<SessionDto> ToDto(SessionRepository.QueryResult<SessionEntity> sessionResult)
         {
             switch (sessionResult.Error)
             {
@@ -247,14 +247,14 @@ namespace WestMarchSite.Application
                 case SessionRepository.QueryResultErrors.Technical:
                     return new FetchResult<SessionDto>(FetchResultErrors.Technical);
                 case null:
-                    var dto = TransformSession(sessionResult.Result);
+                    var dto = ToDto(sessionResult.Result);
                     return new FetchResult<SessionDto>(dto);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(sessionResult));
             }
         }
 
-        private SetResultErrors Translate(SessionRepository.UpdateResultErrors error)
+        private SetResultErrors ToApp(SessionRepository.UpdateResultErrors error)
         {
             switch (error)
             {
@@ -267,10 +267,64 @@ namespace WestMarchSite.Application
             }
         }
 
-        private SessionDto TransformSession(SessionEntity session)
+        private SessionDto ToDto(SessionEntity session)
         {
-            throw new NotImplementedException();
+            return new SessionDto
+            {
+                Description = session.Description,
+                Host = new SessionDto.HostDto
+                {
+                    Name = session.HostName,
+                    Schedule = ToDto(session.HostSchedule),
+                },
+                LeadName = session.LeadName,
+                OpenSchedule = ToDto(session.OpenSchedule),
+                Status = ToDto(session.SessionState),
+                Title = session.Title,
+                Players = session.Players.Select(p => ToDto(p)).ToArray()
+            };
         }
+
+        private SessionDto.PlayerDto ToDto(Player player)
+        {
+            return new SessionDto.PlayerDto
+            {
+                Name = player.Name,
+                Schedule = ToDto(player.Schedule)
+            };
+        }
+
+        private SessionDto.SessionStatusDto ToDto(SessionStates sessionState)
+        {
+            switch (sessionState)
+            {
+                case SessionStates.Created:
+                    throw new InvalidOperationException();
+                case SessionStates.UnApproved:
+                    return SessionDto.SessionStatusDto.Posted;
+                case SessionStates.Approved:
+                    return SessionDto.SessionStatusDto.Approved;
+                case SessionStates.Open:
+                    return SessionDto.SessionStatusDto.Open;
+                case SessionStates.Finalized:
+                    return SessionDto.SessionStatusDto.Finalized;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private SessionScheduleDateDto[] ToDto(SessionSchedule schedule)
+        {
+            return schedule?.Options.Select(o => new SessionScheduleDateDto
+            {
+                Start = o.Start,
+                End = o.End
+            }).ToArray();
+        }
+
+        #endregion
+
+        #region Local Result Typings
 
         public class SetResult
         {
@@ -326,5 +380,7 @@ namespace WestMarchSite.Application
             NotFound,
             Technical
         }
+
+        #endregion
     }
 }

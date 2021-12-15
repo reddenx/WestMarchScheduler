@@ -63,11 +63,13 @@ namespace WestMarchSite.Infrastructure
         public SessionStatusDto Status { get; set; }
 
         public HostDto Host { get; set; }
-        public LeadDto Lead { get; set; }
+        public string LeadName { get; set; }
+
+        public SessionScheduleDateDto[] OpenSchedule { get; set; }
 
         public string Title { get; set; }
         public string Description { get; set; }
-        public DateTime PostDate { get; set; }
+        //public DateTime PostDate { get; set; }
 
         public PlayerDto[] Players { get; set; }
 

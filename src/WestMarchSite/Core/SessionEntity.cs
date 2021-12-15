@@ -8,7 +8,7 @@ namespace WestMarchSite.Core
 {
     public class SessionEntity
     {
-        //public SessionStates SessionState { get; private set; }
+        public SessionStates SessionState { get; private set; }
 
         public string HostKey { get; }
         public string LeadKey { get; }
@@ -18,68 +18,80 @@ namespace WestMarchSite.Core
         public string Description { get; private set; }
 
         public string LeadName { get; private set; }
-        public SessionSchedule LeadSchedule { get; private set; }
 
         public string HostName { get; private set; }
         public SessionSchedule HostSchedule { get; private set; }
 
+        public SessionSchedule OpenSchedule { get; private set; }
+
         public IEnumerable<Player> Players => _playerList;
         private List<Player> _playerList;
 
-        public bool IsValid => throw new NotImplementedException();
-        private List<string> ValidationErrors;
+        public SessionSchedule FinalizedSchedule { get; private set; }
+
+        public bool IsValid => !_validationErrors.Any();
+
+        private List<string> _validationErrors;
 
         public SessionEntity()
         {
-            ValidationErrors = new List<string>();
+            SessionState = SessionStates.Created;
+            _validationErrors = new List<string>();
             _playerList = new List<Player>();
         }
 
-        //public void UpdateState(SessionStates newState)
-        //{
-        //    switch (this.SessionState)
-        //    {
-        //        case SessionStates.Created:
-        //            if (newState != SessionStates.UnApproved)
-        //                this.ValidationErrors.Add($"cannot move from created to {newState}");
-        //            else if (string.IsNullOrWhiteSpace(this.LeadName))
-        //                this.ValidationErrors.Add("lead must be set to move to seek approval");
-        //            else
-        //            {
-        //                this.SessionState = newState;
-        //            }
-        //            return;
-        //        case SessionStates.UnApproved:
-        //            if (newState != SessionStates.Approved)
-        //                this.ValidationErrors.Add($"cannot move from unapproved to {newState}");
-        //            else if (string.IsNullOrWhiteSpace(this.HostName) || (!this.HostSchedule?.Options?.Any() ?? true))
-        //                this.ValidationErrors.Add("host and their schedule must be set to be approved");
-        //            else
-        //            {
-        //                this.SessionState = newState;
-        //            }
-        //            return;
-        //        case SessionStates.Approved:
-        //            if (newState != SessionStates.Open)
-        //                this.ValidationErrors.Add($"cannot move from approved to {newState}");
-        //            else if (this.lead)
-        //            return;
-        //        case SessionStates.Open:
-        //            break;
-        //        case SessionStates.Scheduled:
-        //            break;
-        //    }
-        //}
+        public void ProgressState()
+        {
+            switch (this.SessionState)
+            {
+                case SessionStates.Created:
+                    //gotta have all the info filled in before submission
+                    if (string.IsNullOrWhiteSpace(this.LeadName))
+                        this._validationErrors.Add("lead must be set to move to seek approval");
+                    else
+                    {
+                        this.SessionState = SessionStates.UnApproved;
+                    }
+                    return;
+                case SessionStates.UnApproved:
+                    //gotta have the host and host's schedule filled in for review
+                    if (string.IsNullOrWhiteSpace(this.HostName) || (!this.HostSchedule?.Options?.Any() ?? true))
+                        this._validationErrors.Add("host and their schedule must be set to be approved");
+                    else
+                    {
+                        this.SessionState = SessionStates.Approved;
+                    }
+                    return;
+                case SessionStates.Approved:
+                    //lead must submit their schedule, then it should be good to go
+                    if (!this.OpenSchedule?.Options?.Any() ?? true)
+                        this._validationErrors.Add("lead must have submitted their schedule to move to open");
+                    else
+                    {
+                        this.SessionState = SessionStates.Open;
+                    }
+                    return;
+                case SessionStates.Open:
+                    //a final schedule must be set in order for the session to be finalized
+                    if (!this.FinalizedSchedule?.Options?.Any() ?? true)
+                        this._validationErrors.Add("finalzied schedule must be provided before session can be closed");
+                    else
+                    {
+                        this.SessionState = SessionStates.Finalized;
+                    }
+                    return;
+                case SessionStates.Finalized:
+                    this._validationErrors.Add("cannot progress beyond closed state");
+                    return;
+            }
+        }
 
         public void SetInfo(string title, string description)
         {
-            //if (this.SessionState != SessionStates.Created)
-            //    this.ValidationErrors.Add("info cannot be set unless creating a session");
-            //else 
             if (!string.IsNullOrEmpty(this.Title))
-                this.ValidationErrors.Add("title already populated");
+                this._validationErrors.Add("title already populated");
             else if (!string.IsNullOrEmpty(this.Description))
-                this.ValidationErrors.Add("description already populated");
+                this._validationErrors.Add("description already populated");
             else
             {
                 this.Title = title;
@@ -90,9 +102,9 @@ namespace WestMarchSite.Core
         public void SetLead(string leadName)
         {
             if (!string.IsNullOrEmpty(this.LeadName))
-                this.ValidationErrors.Add("lead is already set");
+                this._validationErrors.Add("lead is already set");
             else if (!string.IsNullOrWhiteSpace(LeadName))
-                this.ValidationErrors.Add("lead's name must not be blank");
+                this._validationErrors.Add("lead's name must not be blank");
             else
             {
                 this.LeadName = LeadName;
@@ -102,7 +114,7 @@ namespace WestMarchSite.Core
         public void SetHost(string hostName)
         {
             if (!string.IsNullOrEmpty(this.HostName))
-                this.ValidationErrors.Add("host is already set");
+                this._validationErrors.Add("host is already set");
             else
             {
                 this.HostName = HostName;
@@ -118,7 +130,7 @@ namespace WestMarchSite.Core
         //TODO more validation errors below here
         public void SetLeadSchedule(SessionSchedule sessionSchedules)
         {
-            this.LeadSchedule = sessionSchedules;
+            this.OpenSchedule = sessionSchedules;
         }
 
         public void AddPlayer(string name, SessionSchedule schedule)
@@ -126,14 +138,9 @@ namespace WestMarchSite.Core
             this._playerList.Add(new Player(name, schedule));
         }
 
-        public void SetFinalSchedule(HostFinalizeDto finalizeDto)
+        public void SetFinalSchedule(SessionSchedule schedule)
         {
-            this.
-        }
-
-        public void Finalize()
-        {
-            
+            this.FinalizedSchedule = schedule;
         }
     }
 
@@ -143,6 +150,6 @@ namespace WestMarchSite.Core
         UnApproved,
         Approved,
         Open,
-        Closed
+        Finalized
     }
 }
