@@ -63,7 +63,7 @@ namespace WestMarchSite.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult Finalize([FromRoute]string key)
+        public IActionResult Finalize([FromRoute]string key, [FromBody]HostFinalizeDto finalize)
         {
             throw new NotImplementedException();
         }

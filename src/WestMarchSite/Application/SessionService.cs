@@ -13,8 +13,8 @@ namespace WestMarchSite.Application
         SetResult<CreateSessionResultDto> StartSession(string leadKey, CreateSessionDto createDto);
         SetResult<ApproveSessionResultDto> HostApproveSession(string hostKey, ApproveSessionDto approvalDto);
         SetResult<LeadScheduleResultDto> LeadNarrowsSchedule(string leadKey, LeadScheduleDto leadScheduleDto);
-        bool PlayerJoinSession(string playerKey, PlayerJoinDto playerDto);
-        bool HostFinalizes(string hostKey);
+        SetResult PlayerJoinSession(string playerKey, PlayerJoinDto playerDto);
+        SetResult HostFinalizes(string hostKey, HostFinalizeDto finalizeDto);
 
         FetchResult<SessionDto> GetPlayerSession(string playerKey);
         FetchResult<SessionDto> GetHostSession(string hostKey);
@@ -36,9 +36,8 @@ namespace WestMarchSite.Application
         {
             var newSession = new SessionEntity();
 
-            newSession.Title = createDto.Title;
-            newSession.Description = createDto.Description;
-            newSession.LeadName = createDto.Name;
+            newSession.SetInfo(createDto.Title, createDto.Description);
+            newSession.SetLead(createDto.Name);
 
             if (!newSession.IsValid)
             {
@@ -70,7 +69,7 @@ namespace WestMarchSite.Application
 
             var session = sessionGetResult.Result;
 
-            session.HostName = approvalDto.Name;
+            session.SetHost(approvalDto.Name);
             session.SetHostSchedule(TranslateSchedule(approvalDto.Schedule));
 
             if (!session.IsValid)
@@ -113,7 +112,6 @@ namespace WestMarchSite.Application
                 return new SetResult<LeadScheduleResultDto>(Translate(saveResult.Error.Value));
             }
 
-
             return new SetResult<LeadScheduleResultDto>(new LeadScheduleResultDto
             {
                 HostKey = session.HostKey,
@@ -122,17 +120,60 @@ namespace WestMarchSite.Application
             });
         }
 
-        public bool PlayerJoinSession(string playerKey, PlayerJoinDto playerDto)
+        public SetResult PlayerJoinSession(string playerKey, PlayerJoinDto playerDto)
         {
-            throw new NotImplementedException();
+            var sessionGetResult = _repo.GetSessionPlayerKey(playerKey);
+            if (!sessionGetResult.IsSuccess)
+            {
+                return new SetResult<bool>(Translate(sessionGetResult.Error.Value));
+            }
+
+            var session = sessionGetResult.Result;
+
+            session.AddPlayer(playerDto.Name, TranslateSchedule(playerDto.Schedule));
+
+            if (!session.IsValid)
+            {
+                return new SetResult(SetResultErrors.InvalidInput);
+            }
+
+            var saveResult = _repo.Save(session);
+            if (!saveResult.IsSuccess)
+            {
+                return new SetResult(Translate(saveResult.Error.Value));
+            }
+
+            return new SetResult();
         }
 
-        public bool HostFinalizes(string hostKey)
+        public SetResult HostFinalizes(string hostKey, HostFinalizeDto finalizeDto)
         {
-            throw new NotImplementedException();
+            var sessionGetResult = _repo.GetSessionHostKey(hostKey);
+            if (!sessionGetResult.IsSuccess)
+            {
+                return new SetResult<bool>(Translate(sessionGetResult.Error.Value));
+            }
+
+            var session = sessionGetResult.Result;
+
+
+            session.SetFinalSchedule(finalizeDto);
+            session.Finalize();
+
+
+            if (!session.IsValid)
+            {
+                return new SetResult(SetResultErrors.InvalidInput);
+            }
+
+            var saveResult = _repo.Save(session);
+            if (!saveResult.IsSuccess)
+            {
+                return new SetResult(Translate(saveResult.Error.Value));
+            }
+
+            return new SetResult();
         }
-
-
 
 
 
@@ -228,22 +269,28 @@ namespace WestMarchSite.Application
             throw new NotImplementedException();
         }
 
-        public class SetResult<T>
-            where T : class
+        public class SetResult
         {
-            public T Result { get; private set; }
             public SetResultErrors? Error { get; private set; }
             public bool IsSuccess => Error != null;
 
-            public SetResult(SetResultErrors error)
+            public SetResult(SetResultErrors? error = null)
             {
-                Result = null;
                 Error = error;
+            }
+        }
+        public class SetResult<T> : SetResult
+        {
+            public T Result { get; private set; }
+
+            public SetResult(SetResultErrors error)
+                : base(error)
+            {
+                Result = default(T);
             }
             public SetResult(T result)
             {
                 Result = result;
-                Error = null;
             }
         }
         public enum SetResultErrors
@@ -254,7 +301,6 @@ namespace WestMarchSite.Application
         }
 
         public class FetchResult<T>
-            where T : class
         {
             public T Result { get; private set; }
             public FetchResultErrors? Error { get; private set; }
@@ -268,7 +314,7 @@ namespace WestMarchSite.Application
 
             public FetchResult(FetchResultErrors error)
             {
-                Result = null;
+                Result = default(T);
                 Error = error;
             }
         }

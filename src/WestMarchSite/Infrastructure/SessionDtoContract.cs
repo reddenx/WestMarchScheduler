@@ -48,6 +48,11 @@ namespace WestMarchSite.Infrastructure
         public SessionScheduleDateDto[] Schedule { get; set; }
     }
 
+    public class HostFinalizeDto
+    {
+        public SessionScheduleDateDto[] Schedule { get; set; }
+    }
+
     public class SessionDto
     {
         //probably best to keep these only on the entity
