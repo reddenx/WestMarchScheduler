@@ -10,7 +10,7 @@ namespace WestMarchSite.Application
 {
     public interface ISessionService
     {
-        SetResult<CreateSessionResultDto> StartSession(string leadKey, CreateSessionDto createDto);
+        SetResult<CreateSessionResultDto> StartSession(CreateSessionDto createDto);
         SetResult<ApproveSessionResultDto> HostApproveSession(string hostKey, ApproveSessionDto approvalDto);
         SetResult<LeadScheduleResultDto> LeadNarrowsSchedule(string leadKey, LeadScheduleDto leadScheduleDto);
         SetResult PlayerJoinSession(string playerKey, PlayerJoinDto playerDto);
@@ -32,7 +32,7 @@ namespace WestMarchSite.Application
             _logger = logger;
         }
 
-        public SetResult<CreateSessionResultDto> StartSession(string leadKey, CreateSessionDto createDto)
+        public SetResult<CreateSessionResultDto> StartSession(CreateSessionDto createDto)
         {
             var newSession = new SessionEntity();
 
