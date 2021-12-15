@@ -11,8 +11,8 @@ namespace WestMarchSite.Application
     public interface ISessionService
     {
         SetResult<CreateSessionResultDto> StartSession(string leadKey, CreateSessionDto createDto);
-        ApproveSessionResultDto DmApproveSession(string dmKey, ApproveSessionDto approvalDto);
-        LeadScheduleResultDto LeadNarrowsSchedule(string leadKey, LeadScheduleDto leadScheduleDto);
+        SetResult<ApproveSessionResultDto> DmApproveSession(string dmKey, ApproveSessionDto approvalDto);
+        SetResult<LeadScheduleResultDto> LeadNarrowsSchedule(string leadKey, LeadScheduleDto leadScheduleDto);
         bool PlayerJoinSession(string playerKey, PlayerJoinDto playerDto);
         bool DmFinalizes(string dmKey);
 
@@ -40,46 +40,86 @@ namespace WestMarchSite.Application
             newSession.Description = createDto.Description;
             newSession.LeadName = createDto.Name;
 
-            if(!newSession.IsValid)
+            if (!newSession.IsValid)
             {
-                return new SetResult<CreateSessionResultDto>(SetResult<CreateSessionResultDto>.SetErrors.InvalidInput);
+                return new SetResult<CreateSessionResultDto>(SetResultErrors.InvalidInput);
             }
 
-            try
+            var saveResult = _repo.Save(newSession);
+            if (!saveResult.IsSuccess)
             {
-                var saveResult = _repo.Save(newSession);
-                switch (saveResult.Error)
-                {
-                    case SessionRepository.UpdateResult<SessionEntity>.UpdateErrors.NotFound:
-                        return new SetResult<CreateSessionResultDto>(SetResult<CreateSessionResultDto>.SetErrors.NotFound);
-                    case SessionRepository.UpdateResult<SessionEntity>.UpdateErrors.Technical:
-                        return new SetResult<CreateSessionResultDto>(SetResult<CreateSessionResultDto>.SetErrors.Technical);
-                    case null:
-                        var dto = new CreateSessionResultDto()
-                        {
-                            DmKey = newSession.DmKey,
-                            LeadKey = newSession.LeadKey,
-                            PlayerKey = newSession.PlayerKey,
-                        };
-                        return new SetResult<CreateSessionResultDto>(dto);
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                return new SetResult<CreateSessionResultDto>(Translate(saveResult.Error.Value));
             }
-            catch
+
+            var dto = new CreateSessionResultDto()
             {
-                return new SetResult<CreateSessionResultDto>(SetResult<CreateSessionResultDto>.SetErrors.Technical);
-            }
+                DmKey = newSession.DmKey,
+                LeadKey = newSession.LeadKey,
+                PlayerKey = newSession.PlayerKey,
+            };
+            return new SetResult<CreateSessionResultDto>(dto);
         }
 
-        public ApproveSessionResultDto DmApproveSession(string dmKey, ApproveSessionDto approvalDto)
+        public SetResult<ApproveSessionResultDto> DmApproveSession(string dmKey, ApproveSessionDto approvalDto)
         {
-            throw new NotImplementedException();
+            var sessionGetResult = _repo.GetSessionDmKey(dmKey);
+            if (!sessionGetResult.IsSuccess)
+            {
+                return new SetResult<ApproveSessionResultDto>(Translate(sessionGetResult.Error.Value));
+            }
+
+            var session = sessionGetResult.Result;
+
+            session.DmName = approvalDto.Name;
+            session.SetDmSchedule(TranslateSchedule(approvalDto.Schedule));
+
+            if (!session.IsValid)
+            {
+                return new SetResult<ApproveSessionResultDto>(SetResultErrors.InvalidInput);
+            }
+
+            var saveResult = _repo.Save(session);
+            if (!saveResult.IsSuccess)
+            {
+                return new SetResult<ApproveSessionResultDto>(Translate(saveResult.Error.Value));
+            }
+
+            return new SetResult<ApproveSessionResultDto>(new ApproveSessionResultDto
+            {
+                DmKey = dmKey
+            });
         }
 
-        public LeadScheduleResultDto LeadNarrowsSchedule(string leadKey, LeadScheduleDto leadScheduleDto)
+        public SetResult<LeadScheduleResultDto> LeadNarrowsSchedule(string leadKey, LeadScheduleDto leadScheduleDto)
         {
-            throw new NotImplementedException();
+            var sessionGetResult = _repo.GetSessionLeadKey(leadKey);
+            if (!sessionGetResult.IsSuccess)
+            {
+                return new SetResult<LeadScheduleResultDto>(Translate(sessionGetResult.Error.Value));
+            }
+
+            var session = sessionGetResult.Result;
+
+            session.SetLeadSchedule(TranslateSchedule(leadScheduleDto.Schedule));
+
+            if (!session.IsValid)
+            {
+                return new SetResult<LeadScheduleResultDto>(SetResultErrors.InvalidInput);
+            }
+
+            var saveResult = _repo.Save(session);
+            if (!saveResult.IsSuccess)
+            {
+                return new SetResult<LeadScheduleResultDto>(Translate(saveResult.Error.Value));
+            }
+
+
+            return new SetResult<LeadScheduleResultDto>(new LeadScheduleResultDto
+            {
+                DmKey = session.DmKey,
+                LeadKey = session.LeadKey,
+                PlayerKey = session.PlayerKey
+            });
         }
 
         public bool PlayerJoinSession(string playerKey, PlayerJoinDto playerDto)
@@ -105,7 +145,7 @@ namespace WestMarchSite.Application
             }
             catch
             {
-                return new FetchResult<SessionDto>(FetchResult<SessionDto>.FetchErrors.Technical);
+                return new FetchResult<SessionDto>(FetchResultErrors.Technical);
             }
         }
 
@@ -118,7 +158,7 @@ namespace WestMarchSite.Application
             }
             catch
             {
-                return new FetchResult<SessionDto>(FetchResult<SessionDto>.FetchErrors.Technical);
+                return new FetchResult<SessionDto>(FetchResultErrors.Technical);
             }
         }
 
@@ -131,25 +171,55 @@ namespace WestMarchSite.Application
             }
             catch
             {
-                return new FetchResult<SessionDto>(FetchResult<SessionDto>.FetchErrors.Technical);
+                return new FetchResult<SessionDto>(FetchResultErrors.Technical);
             }
         }
 
 
+        private SetResultErrors Translate(SessionRepository.QueryResultErrors error)
+        {
+            switch (error)
+            {
+                case SessionRepository.QueryResultErrors.NotFound:
+                    return SetResultErrors.NotFound;
+                case SessionRepository.QueryResultErrors.Technical:
+                    return SetResultErrors.Technical;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private SessionSchedule[] TranslateSchedule(SessionScheduleDateDto[] schedule)
+        {
+            throw new NotImplementedException();
+        }
 
         private FetchResult<SessionDto> TranslateGet(SessionRepository.QueryResult<SessionEntity> sessionResult)
         {
             switch (sessionResult.Error)
             {
-                case SessionRepository.QueryResult<SessionEntity>.QueryErrors.NotFound:
-                    return new FetchResult<SessionDto>(FetchResult<SessionDto>.FetchErrors.NotFound);
-                case SessionRepository.QueryResult<SessionEntity>.QueryErrors.Technical:
-                    return new FetchResult<SessionDto>(FetchResult<SessionDto>.FetchErrors.Technical);
+                case SessionRepository.QueryResultErrors.NotFound:
+                    return new FetchResult<SessionDto>(FetchResultErrors.NotFound);
+                case SessionRepository.QueryResultErrors.Technical:
+                    return new FetchResult<SessionDto>(FetchResultErrors.Technical);
                 case null:
                     var dto = TransformSession(sessionResult.Result);
                     return new FetchResult<SessionDto>(dto);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(sessionResult));
+            }
+        }
+
+        private SetResultErrors Translate(SessionRepository.UpdateResultErrors error)
+        {
+            switch (error)
+            {
+                case SessionRepository.UpdateResultErrors.NotFound:
+                    return SetResultErrors.NotFound;
+                case SessionRepository.UpdateResultErrors.Technical:
+                    return SetResultErrors.Technical;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -162,10 +232,10 @@ namespace WestMarchSite.Application
             where T : class
         {
             public T Result { get; private set; }
-            public SetErrors? Error { get; private set; }
+            public SetResultErrors? Error { get; private set; }
             public bool IsSuccess => Error != null;
 
-            public SetResult(SetErrors error)
+            public SetResult(SetResultErrors error)
             {
                 Result = null;
                 Error = error;
@@ -175,20 +245,19 @@ namespace WestMarchSite.Application
                 Result = result;
                 Error = null;
             }
-
-            public enum SetErrors
-            {
-                NotFound,
-                Technical,
-                InvalidInput
-            }
+        }
+        public enum SetResultErrors
+        {
+            NotFound,
+            Technical,
+            InvalidInput
         }
 
         public class FetchResult<T>
             where T : class
         {
             public T Result { get; private set; }
-            public FetchErrors? Error { get; private set; }
+            public FetchResultErrors? Error { get; private set; }
             public bool IsSuccess => Error != null;
 
             public FetchResult(T result)
@@ -197,17 +266,16 @@ namespace WestMarchSite.Application
                 Error = null;
             }
 
-            public FetchResult(FetchErrors error)
+            public FetchResult(FetchResultErrors error)
             {
                 Result = null;
                 Error = error;
             }
-
-            public enum FetchErrors
-            {
-                NotFound,
-                Technical
-            }
+        }
+        public enum FetchResultErrors
+        {
+            NotFound,
+            Technical
         }
     }
 }

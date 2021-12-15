@@ -20,21 +20,20 @@ namespace WestMarchSite.Infrastructure
         public class UpdateResult<T>
             where T : class
         {
-            public UpdateErrors? Error { get; private set; }
+            public UpdateResultErrors? Error { get; private set; }
             public bool IsSuccess => Error != null;
-
-            public enum UpdateErrors
-            {
-                NotFound,
-                Technical,
-            }
+        }
+        public enum UpdateResultErrors
+        {
+            NotFound,
+            Technical,
         }
 
         public class QueryResult<T>
             where T : class
         {
             public T Result { get; private set; }
-            public QueryErrors? Error { get; private set; }
+            public QueryResultErrors? Error { get; private set; }
             public bool IsSuccess => Error != null;
 
             public QueryResult(T result)
@@ -43,17 +42,16 @@ namespace WestMarchSite.Infrastructure
                 Error = null;
             }
 
-            public QueryResult(QueryErrors error)
+            public QueryResult(QueryResultErrors error)
             {
                 Result = null;
                 Error = error;
             }
-
-            public enum QueryErrors
-            {
-                NotFound,
-                Technical
-            }
+        }
+        public enum QueryResultErrors
+        {
+            NotFound,
+            Technical
         }
     }
 }
