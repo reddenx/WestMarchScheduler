@@ -38,6 +38,7 @@ namespace WestMarchSite.Application
 
             newSession.SetInfo(createDto.Title, createDto.Description);
             newSession.SetLead(createDto.Name);
+            //newSession.UpdateState(SessionStates.UnApproved);
 
             if (!newSession.IsValid)
             {
@@ -71,6 +72,7 @@ namespace WestMarchSite.Application
 
             session.SetHost(approvalDto.Name);
             session.SetHostSchedule(TranslateSchedule(approvalDto.Schedule));
+            //session.UpdateState(SessionStates.Approved);
 
             if (!session.IsValid)
             {
@@ -100,6 +102,7 @@ namespace WestMarchSite.Application
             var session = sessionGetResult.Result;
 
             session.SetLeadSchedule(TranslateSchedule(leadScheduleDto.Schedule));
+            //session.UpdateState(SessionStates.Open);
 
             if (!session.IsValid)
             {

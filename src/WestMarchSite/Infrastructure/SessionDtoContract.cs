@@ -92,7 +92,7 @@ namespace WestMarchSite.Infrastructure
             /// <summary>
             /// idea has been posted but unapproved by Host
             /// </summary>
-            Initiated,
+            Posted,
             /// <summary>
             /// Host has approved and set their schedule, waiting for leader schedule selection
             /// </summary>
