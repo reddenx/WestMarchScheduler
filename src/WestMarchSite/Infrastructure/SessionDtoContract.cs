@@ -14,7 +14,7 @@ namespace WestMarchSite.Infrastructure
 
     public class CreateSessionResultDto
     {
-        public string DmKey { get; set; }
+        public string HostKey { get; set; }
         public string LeadKey { get; set; }
         public string PlayerKey { get; set; }
     }
@@ -27,7 +27,7 @@ namespace WestMarchSite.Infrastructure
 
     public class ApproveSessionResultDto
     {
-        public string DmKey { get; set; }
+        public string HostKey { get; set; }
     }
 
     public class LeadScheduleDto
@@ -38,7 +38,7 @@ namespace WestMarchSite.Infrastructure
     public class LeadScheduleResultDto
     {
         public string LeadKey { get; set; }
-        public string DmKey { get; set; }
+        public string HostKey { get; set; }
         public string PlayerKey { get; set; }
     }
 
@@ -52,7 +52,7 @@ namespace WestMarchSite.Infrastructure
     {
         //probably best to keep these only on the entity
         //public string PlayerKey { get; set; }
-        //public string DmKey { get; set; }
+        //public string HostKey { get; set; }
         //public string LeadKey { get; set; }
 
         public SessionStatusDto Status { get; set; }
@@ -85,11 +85,11 @@ namespace WestMarchSite.Infrastructure
         public enum SessionStatusDto
         {
             /// <summary>
-            /// idea has been posted but unapproved by DM
+            /// idea has been posted but unapproved by Host
             /// </summary>
             Initiated,
             /// <summary>
-            /// DM has approved and set their schedule, waiting for leader schedule selection
+            /// Host has approved and set their schedule, waiting for leader schedule selection
             /// </summary>
             Approved,
             /// <summary>

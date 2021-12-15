@@ -10,7 +10,7 @@ namespace WestMarchSite.Infrastructure
     public interface ISessionRepository
     {
         UpdateResult<SessionEntity> Save(SessionEntity session);
-        QueryResult<SessionEntity> GetSessionDmKey(string dmKey);
+        QueryResult<SessionEntity> GetSessionHostKey(string hostKey);
         QueryResult<SessionEntity> GetSessionLeadKey(string leadKey);
         QueryResult<SessionEntity> GetSessionPlayerKey(string playerKey);
     }

@@ -11,13 +11,13 @@ namespace WestMarchSite.Application
     public interface ISessionService
     {
         SetResult<CreateSessionResultDto> StartSession(string leadKey, CreateSessionDto createDto);
-        SetResult<ApproveSessionResultDto> DmApproveSession(string dmKey, ApproveSessionDto approvalDto);
+        SetResult<ApproveSessionResultDto> HostApproveSession(string hostKey, ApproveSessionDto approvalDto);
         SetResult<LeadScheduleResultDto> LeadNarrowsSchedule(string leadKey, LeadScheduleDto leadScheduleDto);
         bool PlayerJoinSession(string playerKey, PlayerJoinDto playerDto);
-        bool DmFinalizes(string dmKey);
+        bool HostFinalizes(string hostKey);
 
         FetchResult<SessionDto> GetPlayerSession(string playerKey);
-        FetchResult<SessionDto> GetDmSession(string dmKey);
+        FetchResult<SessionDto> GetHostSession(string hostKey);
         FetchResult<SessionDto> GetLeadSession(string leadKey);
     }
 
@@ -53,16 +53,16 @@ namespace WestMarchSite.Application
 
             var dto = new CreateSessionResultDto()
             {
-                DmKey = newSession.DmKey,
+                HostKey = newSession.HostKey,
                 LeadKey = newSession.LeadKey,
                 PlayerKey = newSession.PlayerKey,
             };
             return new SetResult<CreateSessionResultDto>(dto);
         }
 
-        public SetResult<ApproveSessionResultDto> DmApproveSession(string dmKey, ApproveSessionDto approvalDto)
+        public SetResult<ApproveSessionResultDto> HostApproveSession(string hostKey, ApproveSessionDto approvalDto)
         {
-            var sessionGetResult = _repo.GetSessionDmKey(dmKey);
+            var sessionGetResult = _repo.GetSessionHostKey(hostKey);
             if (!sessionGetResult.IsSuccess)
             {
                 return new SetResult<ApproveSessionResultDto>(Translate(sessionGetResult.Error.Value));
@@ -70,8 +70,8 @@ namespace WestMarchSite.Application
 
             var session = sessionGetResult.Result;
 
-            session.DmName = approvalDto.Name;
-            session.SetDmSchedule(TranslateSchedule(approvalDto.Schedule));
+            session.HostName = approvalDto.Name;
+            session.SetHostSchedule(TranslateSchedule(approvalDto.Schedule));
 
             if (!session.IsValid)
             {
@@ -86,7 +86,7 @@ namespace WestMarchSite.Application
 
             return new SetResult<ApproveSessionResultDto>(new ApproveSessionResultDto
             {
-                DmKey = dmKey
+                HostKey = hostKey
             });
         }
 
@@ -116,7 +116,7 @@ namespace WestMarchSite.Application
 
             return new SetResult<LeadScheduleResultDto>(new LeadScheduleResultDto
             {
-                DmKey = session.DmKey,
+                HostKey = session.HostKey,
                 LeadKey = session.LeadKey,
                 PlayerKey = session.PlayerKey
             });
@@ -127,7 +127,7 @@ namespace WestMarchSite.Application
             throw new NotImplementedException();
         }
 
-        public bool DmFinalizes(string dmKey)
+        public bool HostFinalizes(string hostKey)
         {
             throw new NotImplementedException();
         }
@@ -136,11 +136,11 @@ namespace WestMarchSite.Application
 
 
 
-        public FetchResult<SessionDto> GetDmSession(string dmKey)
+        public FetchResult<SessionDto> GetHostSession(string hostKey)
         {
             try
             {
-                var sessionResult = _repo.GetSessionDmKey(dmKey);
+                var sessionResult = _repo.GetSessionHostKey(hostKey);
                 return TranslateGet(sessionResult);
             }
             catch
