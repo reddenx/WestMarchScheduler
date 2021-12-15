@@ -15,8 +15,44 @@ namespace WestMarchSite.Infrastructure
         QueryResult<SessionEntity> GetSessionPlayerKey(string playerKey);
     }
 
-    public class SessionRepository
+    public interface ISessionRepositoryConfiguration
     {
+        string SessionDbConnectionString { get; }
+    }
+
+    public class SessionRepository : ISessionRepository
+    {
+        private readonly string _connectionString;
+
+        public SessionRepository(ISessionRepositoryConfiguration config)
+        {
+            _connectionString = config.SessionDbConnectionString;
+        }
+
+        public UpdateResult<SessionEntity> Save(SessionEntity session)
+        {
+            throw new NotImplementedException();
+        }
+
+        public QueryResult<SessionEntity> GetSessionHostKey(string hostKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public QueryResult<SessionEntity> GetSessionLeadKey(string leadKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public QueryResult<SessionEntity> GetSessionPlayerKey(string playerKey)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+
+
         public class UpdateResult<T>
             where T : class
         {

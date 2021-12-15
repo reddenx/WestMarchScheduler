@@ -18,6 +18,51 @@ namespace WestMarchSite.Controllers
             _sessionService = sessionService;
         }
 
+        [HttpGet("{key}/host")]
+        [ProducesResponseType(200, Type = typeof(SessionDto))]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult GetHostSession([FromRoute]string key)
+        {
+            var result = _sessionService.GetHostSession(key);
+            if(result.IsSuccess)
+            {
+                return Json(result.Result);
+            }
+
+            return MapError(result.Error);
+        }
+
+        [HttpGet("{key}/player")]
+        [ProducesResponseType(200, Type = typeof(SessionDto))]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult GetPlayerSession([FromRoute] string key)
+        {
+            var result = _sessionService.GetPlayerSession(key);
+            if (result.IsSuccess)
+            {
+                return Json(result.Result);
+            }
+
+            return MapError(result.Error);
+        }
+
+        [HttpGet("{key}/lead")]
+        [ProducesResponseType(200, Type = typeof(SessionDto))]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult GetLeadSession([FromRoute] string key)
+        {
+            var result = _sessionService.GetLeadSession(key);
+            if (result.IsSuccess)
+            {
+                return Json(result.Result);
+            }
+
+            return MapError(result.Error);
+        }
+
         [HttpPost("")]
         [ProducesResponseType(200, Type = typeof(CreateSessionResultDto))]
         [ProducesResponseType(400)]
@@ -107,6 +152,19 @@ namespace WestMarchSite.Controllers
                 case SessionService.SetResultErrors.NotFound:
                     return StatusCode(404);
                 case SessionService.SetResultErrors.Technical:
+                    return StatusCode(500);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private IActionResult MapError(SessionService.FetchResultErrors? error)
+        {
+            switch (error)
+            {
+                case SessionService.FetchResultErrors.NotFound:
+                    return StatusCode(404);
+                case SessionService.FetchResultErrors.Technical:
                     return StatusCode(500);
                 default:
                     throw new ArgumentOutOfRangeException();
