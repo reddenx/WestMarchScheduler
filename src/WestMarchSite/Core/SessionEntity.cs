@@ -65,8 +65,6 @@ namespace WestMarchSite.Core
             return Guid.NewGuid().ToString("N").ToLower();
         }
 
-
-
         public void ProgressState()
         {
             switch (this.SessionState)

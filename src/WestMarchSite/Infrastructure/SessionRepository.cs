@@ -234,6 +234,21 @@ namespace WestMarchSite.Infrastructure
             return session;
         }
 
+        private void SaveSessionData(MySqlConnection conn, SessionData sessionData)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void SaveSchedules(MySqlConnection conn, List<SessionScheduleData> schedules)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void SavePlayers(MySqlConnection conn, List<SessionPlayerData> players)
+        {
+            throw new NotImplementedException();
+        }
+
         private SessionScheduleData[] GetSchedules(MySqlConnection conn, string hostKey)
         {
             throw new NotImplementedException();
@@ -255,21 +270,6 @@ namespace WestMarchSite.Infrastructure
         }
 
         private SessionData GetSessionHostData(MySqlConnection conn, string hostKey)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void SaveSessionData(MySqlConnection conn, SessionData sessionData)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void SaveSchedules(MySqlConnection conn, List<SessionScheduleData> schedules)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void SavePlayers(MySqlConnection conn, List<SessionPlayerData> players)
         {
             throw new NotImplementedException();
         }
