@@ -278,7 +278,7 @@ namespace WestMarchSite.Application
                     Schedule = ToDto(session.HostSchedule),
                 },
                 LeadName = session.LeadName,
-                OpenSchedule = ToDto(session.OpenSchedule),
+                OpenSchedule = ToDto(session.LeadSchedule),
                 Status = ToDto(session.SessionState),
                 Title = session.Title,
                 Players = session.Players.Select(p => ToDto(p)).ToArray()

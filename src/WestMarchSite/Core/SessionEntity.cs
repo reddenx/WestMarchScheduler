@@ -22,7 +22,7 @@ namespace WestMarchSite.Core
         public string HostName { get; private set; }
         public SessionSchedule HostSchedule { get; private set; }
 
-        public SessionSchedule OpenSchedule { get; private set; }
+        public SessionSchedule LeadSchedule { get; private set; }
 
         public IEnumerable<Player> Players => _playerList;
         private List<Player> _playerList;
@@ -33,12 +33,39 @@ namespace WestMarchSite.Core
 
         private List<string> _validationErrors;
 
+        //for new entities
         public SessionEntity()
+            : this(SessionEntity.GenerateHostKey(), SessionEntity.GenerateLeadKey(), SessionEntity.GeneratePlayerKey())
+        { }
+
+        //for existing entities prepping for hydration, TODO: protect better, larger pattern at this point would be silly, expand later
+        public SessionEntity(string hostKey, string leadKey, string playerKey)
         {
+            this.HostKey = hostKey;
+            this.LeadKey = leadKey;
+            this.PlayerKey = playerKey;
+
             SessionState = SessionStates.Created;
             _validationErrors = new List<string>();
             _playerList = new List<Player>();
         }
+
+        private static string GeneratePlayerKey()
+        {
+            return Guid.NewGuid().ToString("N").ToLower();
+        }
+
+        private static string GenerateLeadKey()
+        {
+            return Guid.NewGuid().ToString("N").ToLower();
+        }
+
+        private static string GenerateHostKey()
+        {
+            return Guid.NewGuid().ToString("N").ToLower();
+        }
+
+
 
         public void ProgressState()
         {
@@ -64,7 +91,7 @@ namespace WestMarchSite.Core
                     return;
                 case SessionStates.Approved:
                     //lead must submit their schedule, then it should be good to go
-                    if (!this.OpenSchedule?.Options?.Any() ?? true)
+                    if (!this.LeadSchedule?.Options?.Any() ?? true)
                         this._validationErrors.Add("lead must have submitted their schedule to move to open");
                     else
                     {
@@ -144,7 +171,7 @@ namespace WestMarchSite.Core
                 this._validationErrors.Add("host schedule must be populated");
             else
             {
-                this.OpenSchedule = schedule;
+                this.LeadSchedule = schedule;
             }
         }
 
