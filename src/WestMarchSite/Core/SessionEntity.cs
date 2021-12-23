@@ -88,10 +88,14 @@ namespace WestMarchSite.Core
 
         public void SetInfo(string title, string description)
         {
-            if (!string.IsNullOrEmpty(this.Title))
+            if (!string.IsNullOrWhiteSpace(this.Title))
                 this._validationErrors.Add("title already populated");
-            else if (!string.IsNullOrEmpty(this.Description))
+            else if (!string.IsNullOrWhiteSpace(this.Description))
                 this._validationErrors.Add("description already populated");
+            else if (string.IsNullOrWhiteSpace(title))
+                this._validationErrors.Add("title must not be empty");
+            else if (string.IsNullOrWhiteSpace(description))
+                this._validationErrors.Add("description must not be empty");
             else
             {
                 this.Title = title;
@@ -101,41 +105,59 @@ namespace WestMarchSite.Core
 
         public void SetLead(string leadName)
         {
-            if (!string.IsNullOrEmpty(this.LeadName))
+            if (!string.IsNullOrWhiteSpace(this.LeadName))
                 this._validationErrors.Add("lead is already set");
-            else if (!string.IsNullOrWhiteSpace(LeadName))
+            else if (string.IsNullOrWhiteSpace(leadName))
                 this._validationErrors.Add("lead's name must not be blank");
             else
             {
-                this.LeadName = LeadName;
+                this.LeadName = leadName;
             }
         }
 
         public void SetHost(string hostName)
         {
-            if (!string.IsNullOrEmpty(this.HostName))
+            if (!string.IsNullOrWhiteSpace(this.HostName))
                 this._validationErrors.Add("host is already set");
+            else if (string.IsNullOrWhiteSpace(hostName))
+                this._validationErrors.Add("hostname can't be empty");
             else
             {
-                this.HostName = HostName;
+                this.HostName = hostName;
             }
         }
 
         public void SetHostSchedule(SessionSchedule schedule)
         {
-            //can't think of any validation errors? maybe state once it's set
-            this.HostSchedule = schedule;
+            if (schedule?.Options?.Any() != true)
+                this._validationErrors.Add("host schedule must be populated");
+            else
+            {
+                //can't think of any validation errors? maybe state once it's set
+                this.HostSchedule = schedule;
+            }
         }
 
-        //TODO more validation errors below here
-        public void SetLeadSchedule(SessionSchedule sessionSchedules)
+        public void SetLeadSchedule(SessionSchedule schedule)
         {
-            this.OpenSchedule = sessionSchedules;
+            if (schedule?.Options?.Any() != true)
+                this._validationErrors.Add("host schedule must be populated");
+            else
+            {
+                this.OpenSchedule = schedule;
+            }
         }
 
         public void AddPlayer(string name, SessionSchedule schedule)
         {
-            this._playerList.Add(new Player(name, schedule));
+            if (string.IsNullOrWhiteSpace(name))
+                this._validationErrors.Add("player name must be populated");
+            else if (schedule?.Options?.Any() != true)
+                this._validationErrors.Add("host schedule must be populated");
+            else
+            {
+                this._playerList.Add(new Player(name, schedule));
+            }
         }
 
         public void SetFinalSchedule(SessionSchedule schedule)

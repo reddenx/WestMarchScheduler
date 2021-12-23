@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using Dapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +11,7 @@ namespace WestMarchSite.Infrastructure
 {
     public interface ISessionRepository
     {
-        UpdateResult<SessionEntity> Save(SessionEntity session);
+        UpdateResult Save(SessionEntity session);
         QueryResult<SessionEntity> GetSessionHostKey(string hostKey);
         QueryResult<SessionEntity> GetSessionLeadKey(string leadKey);
         QueryResult<SessionEntity> GetSessionPlayerKey(string playerKey);
@@ -29,7 +31,7 @@ namespace WestMarchSite.Infrastructure
             _connectionString = config.SessionDbConnectionString;
         }
 
-        public UpdateResult<SessionEntity> Save(SessionEntity session)
+        public UpdateResult Save(SessionEntity session)
         {
             throw new NotImplementedException();
         }
@@ -50,14 +52,20 @@ namespace WestMarchSite.Infrastructure
         }
 
 
-
-
-
-        public class UpdateResult<T>
-            where T : class
+        public class UpdateResult
         {
             public UpdateResultErrors? Error { get; private set; }
-            public bool IsSuccess => Error != null;
+            public bool IsSuccess => Error == null;
+
+            public UpdateResult()
+            {
+                this.Error = null;
+            }
+
+            public UpdateResult(UpdateResultErrors error)
+            {
+                this.Error = error;
+            }
         }
         public enum UpdateResultErrors
         {
@@ -70,7 +78,7 @@ namespace WestMarchSite.Infrastructure
         {
             public T Result { get; private set; }
             public QueryResultErrors? Error { get; private set; }
-            public bool IsSuccess => Error != null;
+            public bool IsSuccess => Error == null;
 
             public QueryResult(T result)
             {

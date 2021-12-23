@@ -233,7 +233,7 @@ namespace WestMarchSite.Application
         private SessionSchedule ToCore(SessionScheduleDateDto[] schedule)
         {
             return new SessionSchedule(
-                options: schedule
+                options: schedule?
                     .Select(s => new SessionScheduleOption(s.Start, s.End)
                 ).ToArray());
         }
@@ -329,7 +329,7 @@ namespace WestMarchSite.Application
         public class SetResult
         {
             public SetResultErrors? Error { get; private set; }
-            public bool IsSuccess => Error != null;
+            public bool IsSuccess => Error == null;
 
             public SetResult(SetResultErrors? error = null)
             {
@@ -361,7 +361,7 @@ namespace WestMarchSite.Application
         {
             public T Result { get; private set; }
             public FetchResultErrors? Error { get; private set; }
-            public bool IsSuccess => Error != null;
+            public bool IsSuccess => Error == null;
 
             public FetchResult(T result)
             {
