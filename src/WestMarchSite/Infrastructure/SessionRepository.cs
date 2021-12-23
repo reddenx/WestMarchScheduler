@@ -182,9 +182,56 @@ namespace WestMarchSite.Infrastructure
             }
         }
 
+        //this should probably be moved to a session entity factory, meh
         private SessionEntity AssembleSession(SessionData sessionData, SessionPlayerData[] players, SessionScheduleData[] schedules)
         {
-            throw new NotImplementedException();
+            var session = new SessionEntity(sessionData.HostKey, sessionData.LeadKey, sessionData.PlayerKey);
+            var lead = players.FirstOrDefault(p => p.Role == "lead"); //TODO: these should probably be const'd somewhere... another time
+            if (sessionData.Title != null
+                && sessionData.Description != null
+                && lead != null)
+            {
+                session.SetInfo(sessionData.Title, sessionData.Description);
+                session.SetLead(lead.Name);
+                session.ProgressState();
+
+                var host = players.FirstOrDefault(p => p.Role == "host");
+                var hostSchedule = schedules.Where(s => s.Name == host.Name).ToArray();
+                if (host != null && hostSchedule?.Any() == true)
+                {
+                    session.SetHost(host.Name);
+                    session.SetHostSchedule(new SessionSchedule(hostSchedule.Select(s => new SessionScheduleOption(s.Start, s.End)).ToArray()));
+                    session.ProgressState();
+
+                    var leadSchedule = schedules.Where(s => s.Name == lead.Name).ToArray();
+                    if (leadSchedule?.Any() == true)
+                    {
+                        session.SetLeadSchedule(new SessionSchedule(leadSchedule.Select(s => new SessionScheduleOption(s.Start, s.End)).ToArray()));
+                        session.ProgressState();
+
+                        var playerPlayers = players.Where(p => p.Role == "player").ToArray();
+                        if (playerPlayers.Any())
+                        {
+                            //lol
+                            foreach (var playerPlayersPlayer in playerPlayers)
+                            {
+                                var playerPlayerSchedule = schedules.Where(s => s.Name == playerPlayersPlayer.Name).ToArray();
+
+                                session.AddPlayer(playerPlayersPlayer.Name, new SessionSchedule(playerPlayerSchedule.Select(s => new SessionScheduleOption(s.Start, s.End)).ToArray()));
+                            }
+                        }
+
+                        var finalSchedule = schedules.Where(s => s.Name == null).ToArray();
+                        if(finalSchedule?.Any() == true)
+                        {
+                            session.SetFinalSchedule(new SessionSchedule(finalSchedule.Select(s => new SessionScheduleOption(s.Start, s.End)).ToArray()));
+                            session.ProgressState();
+                        }
+                    }
+                }
+            }
+
+            return session;
         }
 
         private SessionScheduleData[] GetSchedules(MySqlConnection conn, string hostKey)
