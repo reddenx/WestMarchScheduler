@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WestMarchSite.Application;
+using WestMarchSite.Infrastructure;
 
 namespace WestMarchSite.Controllers
 {
@@ -17,14 +18,65 @@ namespace WestMarchSite.Controllers
             _sessionService = sessionService;
         }
 
-        [HttpPost("{key}")]
+        [HttpGet("{key}/host")]
+        [ProducesResponseType(200, Type = typeof(SessionDto))]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult GetHostSession([FromRoute]string key)
+        {
+            var result = _sessionService.GetHostSession(key);
+            if(result.IsSuccess)
+            {
+                return Json(result.Result);
+            }
+
+            return MapError(result.Error);
+        }
+
+        [HttpGet("{key}/player")]
+        [ProducesResponseType(200, Type = typeof(SessionDto))]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult GetPlayerSession([FromRoute] string key)
+        {
+            var result = _sessionService.GetPlayerSession(key);
+            if (result.IsSuccess)
+            {
+                return Json(result.Result);
+            }
+
+            return MapError(result.Error);
+        }
+
+        [HttpGet("{key}/lead")]
+        [ProducesResponseType(200, Type = typeof(SessionDto))]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult GetLeadSession([FromRoute] string key)
+        {
+            var result = _sessionService.GetLeadSession(key);
+            if (result.IsSuccess)
+            {
+                return Json(result.Result);
+            }
+
+            return MapError(result.Error);
+        }
+
+        [HttpPost("")]
         [ProducesResponseType(200, Type = typeof(CreateSessionResultDto))]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult CreateSession([FromRoute]string key, [FromBody]CreateSessionDto create)
+        public IActionResult CreateSession([FromBody]CreateSessionDto create)
         {
-            throw new NotImplementedException();
+            var result = _sessionService.StartSession(create);
+            if(result.IsSuccess)
+            {
+                return Json(result.Result);
+            }
+
+            return MapError(result.Error);
         }
 
         [HttpPut("{key}/approve")]
@@ -34,7 +86,13 @@ namespace WestMarchSite.Controllers
         [ProducesResponseType(500)]
         public IActionResult ApproveSession([FromRoute]string key, [FromBody]ApproveSessionDto approval)
         {
-            throw new NotImplementedException();
+            var result = _sessionService.HostApproveSession(key, approval);
+            if (result.IsSuccess)
+            {
+                return Json(result.Result);
+            }
+
+            return MapError(result.Error);
         }
 
         [HttpPut("{key}/schedule")]
@@ -44,7 +102,13 @@ namespace WestMarchSite.Controllers
         [ProducesResponseType(500)]
         public IActionResult LeadSchedule([FromRoute]string key, [FromBody]LeadScheduleDto lead)
         {
-            throw new NotImplementedException();
+            var result = _sessionService.LeadNarrowsSchedule(key, lead);
+            if (result.IsSuccess)
+            {
+                return Json(result.Result);
+            }
+
+            return MapError(result.Error);
         }
 
         [HttpPut("{key}/join")]
@@ -54,7 +118,13 @@ namespace WestMarchSite.Controllers
         [ProducesResponseType(500)]
         public IActionResult PlayerJoin([FromRoute]string key, [FromBody]PlayerJoinDto join)
         {
-            throw new NotImplementedException();
+            var result = _sessionService.PlayerJoinSession(key, join);
+            if (result.IsSuccess)
+            {
+                return StatusCode(204);
+            }
+
+            return MapError(result.Error);
         }
 
         [HttpPut("{key}/finalize")]
@@ -62,9 +132,43 @@ namespace WestMarchSite.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult Finalize([FromRoute]string key)
+        public IActionResult Finalize([FromRoute]string key, [FromBody]HostFinalizeDto finalize)
         {
-            throw new NotImplementedException();
+            var result = _sessionService.HostFinalizes(key, finalize);
+            if (result.IsSuccess)
+            {
+                return StatusCode(204);
+            }
+
+            return MapError(result.Error);
+        }
+
+        private IActionResult MapError(SessionService.SetResultErrors? error)
+        {
+            switch (error)
+            {
+                case SessionService.SetResultErrors.InvalidInput:
+                    return StatusCode(400);
+                case SessionService.SetResultErrors.NotFound:
+                    return StatusCode(404);
+                case SessionService.SetResultErrors.Technical:
+                    return StatusCode(500);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private IActionResult MapError(SessionService.FetchResultErrors? error)
+        {
+            switch (error)
+            {
+                case SessionService.FetchResultErrors.NotFound:
+                    return StatusCode(404);
+                case SessionService.FetchResultErrors.Technical:
+                    return StatusCode(500);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }

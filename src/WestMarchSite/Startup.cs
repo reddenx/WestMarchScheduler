@@ -38,7 +38,7 @@ namespace WestMarchSite
             //swagger
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info { Title = "West Marches API", Version = "v1" });
+                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "West Marches API", Version = "v1" });
             });
 
             //dependencies

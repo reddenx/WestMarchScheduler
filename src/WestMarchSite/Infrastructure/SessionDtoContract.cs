@@ -3,21 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WestMarchSite.Application
+namespace WestMarchSite.Infrastructure
 {
-    public interface ISessionService
-    {
-        CreateSessionResultDto StartSession(string leadKey, CreateSessionDto createDto);
-        ApproveSessionResultDto DmApproveSession(string dmKey, ApproveSessionDto approvalDto);
-        LeadScheduleResultDto LeadNarrowsSchedule(string leadKey, LeadScheduleDto leadScheduleDto);
-        bool PlayerJoinSession(string playerKey, PlayerJoinDto playerDto);
-        bool DmFinalizes(string dmKey);
-
-        SessionDto GetPlayerSession(string playerKey);
-        SessionDto GetDmSession(string dmKey);
-        SessionDto GetLeadSession(string leadKey);
-    }
-
     public class CreateSessionDto
     {
         public string Name { get; set; }
@@ -27,7 +14,7 @@ namespace WestMarchSite.Application
 
     public class CreateSessionResultDto
     {
-        public string DmKey { get; set; }
+        public string HostKey { get; set; }
         public string LeadKey { get; set; }
         public string PlayerKey { get; set; }
     }
@@ -40,7 +27,7 @@ namespace WestMarchSite.Application
 
     public class ApproveSessionResultDto
     {
-        public string DmKey { get; set; }
+        public string HostKey { get; set; }
     }
 
     public class LeadScheduleDto
@@ -51,7 +38,7 @@ namespace WestMarchSite.Application
     public class LeadScheduleResultDto
     {
         public string LeadKey { get; set; }
-        public string DmKey { get; set; }
+        public string HostKey { get; set; }
         public string PlayerKey { get; set; }
     }
 
@@ -61,21 +48,28 @@ namespace WestMarchSite.Application
         public SessionScheduleDateDto[] Schedule { get; set; }
     }
 
+    public class HostFinalizeDto
+    {
+        public SessionScheduleDateDto[] Schedule { get; set; }
+    }
+
     public class SessionDto
     {
         //probably best to keep these only on the entity
         //public string PlayerKey { get; set; }
-        //public string DmKey { get; set; }
+        //public string HostKey { get; set; }
         //public string LeadKey { get; set; }
 
         public SessionStatusDto Status { get; set; }
 
         public HostDto Host { get; set; }
-        public LeadDto Lead { get; set; }
+        public string LeadName { get; set; }
+
+        public SessionScheduleDateDto[] OpenSchedule { get; set; }
 
         public string Title { get; set; }
         public string Description { get; set; }
-        public DateTime PostDate { get; set; }
+        //public DateTime PostDate { get; set; }
 
         public PlayerDto[] Players { get; set; }
 
@@ -98,11 +92,11 @@ namespace WestMarchSite.Application
         public enum SessionStatusDto
         {
             /// <summary>
-            /// idea has been posted but unapproved by DM
+            /// idea has been posted but unapproved by Host
             /// </summary>
-            Initiated,
+            Posted,
             /// <summary>
-            /// DM has approved and set their schedule, waiting for leader schedule selection
+            /// Host has approved and set their schedule, waiting for leader schedule selection
             /// </summary>
             Approved,
             /// <summary>
@@ -121,5 +115,4 @@ namespace WestMarchSite.Application
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
     }
-
 }
