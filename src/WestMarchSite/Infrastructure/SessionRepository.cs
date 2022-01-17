@@ -102,8 +102,8 @@ namespace WestMarchSite.Infrastructure
                 using (var conn = new MySqlConnection(_connectionString))
                 {
                     SaveSessionData(conn, sessionData);
-                    SavePlayers(conn, players);
-                    SaveSchedules(conn, schedules);
+                    SavePlayers(conn, players.ToArray(), session.HostKey);
+                    SaveSchedules(conn, schedules.ToArray(), session.HostKey);
                 }
                 return new UpdateResult();
             }
@@ -236,42 +236,161 @@ namespace WestMarchSite.Infrastructure
 
         private void SaveSessionData(MySqlConnection conn, SessionData sessionData)
         {
-            throw new NotImplementedException();
+            var existingSession = GetSessionHostData(conn, sessionData.HostKey);
+
+            if(existingSession == null)
+            {
+                var update = @"
+insert into `SessionInfo` (`HostKey`, `LeadKey`, `PlayerKey`, `Title`, `Description`)
+values (@HostKey, @LeadKey, @PlayerKey, @Title, @Description);";
+                conn.Execute(update, new 
+                {
+                    HostKey = sessionData.HostKey,
+                    LeadKey = sessionData.LeadKey,
+                    PlayerKey = sessionData.PlayerKey,
+                    Title = sessionData.Title,
+                    Description = sessionData.Description
+                });
+            }
+            else
+            {
+                var insert = @"
+update `SessionInfo`
+set
+	`Title` = @Title,
+	`Description` = @Description
+where `HostKey` = @HostKey;";
+                conn.Execute(insert, new 
+                {
+                    HostKey = sessionData.HostKey,
+                    Title = sessionData.Title,
+                    Description = sessionData.Description
+                });
+            }
+
         }
 
-        private void SaveSchedules(MySqlConnection conn, List<SessionScheduleData> schedules)
+        private void SaveSchedules(MySqlConnection conn, SessionScheduleData[] schedules, string hostKey)
         {
-            throw new NotImplementedException();
+            var delete = @"
+delete
+from `ScheduleInfo`
+where `HostKey` = @HostKey";
+            conn.Execute(delete, new { HostKey =  hostKey});
+
+            //this is brutally inefficient, TODO fix with TVPs or something later
+
+            var insert = @"
+insert into `ScheduleInfo` (`HostKey`, `Name`, `Start`, `End`)
+values (@HostKey, @Name, @Start, @End);";
+            foreach (var schedule in schedules)
+            {
+                conn.Execute(insert, new 
+                {
+                    HostKey = schedule.HostKey,
+                    Name = schedule.Name,
+                    Start = schedule.Start,
+                    End = schedule.End
+                });
+            }
         }
 
-        private void SavePlayers(MySqlConnection conn, List<SessionPlayerData> players)
+        private void SavePlayers(MySqlConnection conn, SessionPlayerData[] players, string hostKey)
         {
-            throw new NotImplementedException();
+            var delete = @"
+delete from `Player`
+where `HostKey` = @HostKey";
+            conn.Execute(delete, new { HostKey = hostKey });
+
+            var insert = @"
+insert into `Player` (`HostKey`, `Name`, `Role`)
+values (@HostKey, @Name, @Role)";
+            foreach (var player in players)
+            {
+                conn.Execute(insert, new
+                {
+                    HostKey = player.HostKey,
+                    Name = player.Name,
+                    Role = player.Role
+                });
+            }
         }
 
         private SessionScheduleData[] GetSchedules(MySqlConnection conn, string hostKey)
         {
-            throw new NotImplementedException();
+            var sql = @"
+select 
+	s.`HostKey`,
+    s.`Name`,
+    s.`Start`,
+    s.`End`
+from `scheduleinfo` s
+where s.`HostKey` = @HostKey";
+
+            var schedules = conn.Query<SessionScheduleData>(sql, new { HostKey = hostKey });
+            return schedules.ToArray();
         }
 
         private SessionPlayerData[] GetPlayers(MySqlConnection conn, string hostKey)
         {
-            throw new NotImplementedException();
+            var sql = @"
+select 
+	p.`HostKey`,
+	p.`Name`,
+    p.`Role`
+from `player` p
+where p.`HostKey` = @HostKey";
+
+            var players = conn.Query<SessionPlayerData>(sql, new { HostKey = hostKey });
+            return players.ToArray();
         }
 
         private SessionData GetSessionPlayerData(MySqlConnection conn, string playerKey)
         {
-            throw new NotImplementedException();
+            var sql = @"
+select 
+	s.`HostKey`,
+    s.`LeadKey`,
+    s.`PlayerKey`,
+    s.`Title`,
+    s.`Description`
+from `SessionInfo` s
+where s.`PlayerKey` = @PlayerKey";
+
+            var data = conn.Query<SessionData>(sql, new { PlayerKey = playerKey });
+            return data.FirstOrDefault();
         }
 
         private SessionData GetSessionLeadData(MySqlConnection conn, string leadKey)
         {
-            throw new NotImplementedException();
+            var sql = @"
+select 
+	s.`HostKey`,
+    s.`LeadKey`,
+    s.`PlayerKey`,
+    s.`Title`,
+    s.`Description`
+from `SessionInfo` s
+where s.`LeadKey` = @LeadKey";
+
+            var data = conn.Query<SessionData>(sql, new { LeadKey = leadKey });
+            return data.FirstOrDefault();
         }
 
         private SessionData GetSessionHostData(MySqlConnection conn, string hostKey)
         {
-            throw new NotImplementedException();
+            var sql = @"
+select 
+	s.`HostKey`,
+    s.`LeadKey`,
+    s.`PlayerKey`,
+    s.`Title`,
+    s.`Description`
+from `SessionInfo` s
+where s.`HostKey` = @HostKey";
+
+            var data = conn.Query<SessionData>(sql, new { HostKey = hostKey });
+            return data.FirstOrDefault();
         }
 
         private class SessionData
