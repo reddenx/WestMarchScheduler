@@ -238,7 +238,7 @@ namespace WestMarchSite.Infrastructure
         {
             var existingSession = GetSessionHostData(conn, sessionData.HostKey);
 
-            if(existingSession != null)
+            if(existingSession == null)
             {
                 var update = @"
 insert into `SessionInfo` (`HostKey`, `LeadKey`, `PlayerKey`, `Title`, `Description`)
@@ -357,8 +357,8 @@ select
 from `SessionInfo` s
 where s.`PlayerKey` = @PlayerKey";
 
-            var data = conn.QuerySingle<SessionData>(sql, new { PlayerKey = playerKey });
-            return data;
+            var data = conn.Query<SessionData>(sql, new { PlayerKey = playerKey });
+            return data.FirstOrDefault();
         }
 
         private SessionData GetSessionLeadData(MySqlConnection conn, string leadKey)
@@ -373,8 +373,8 @@ select
 from `SessionInfo` s
 where s.`LeadKey` = @LeadKey";
 
-            var data = conn.QuerySingle<SessionData>(sql, new { LeadKey = leadKey });
-            return data;
+            var data = conn.Query<SessionData>(sql, new { LeadKey = leadKey });
+            return data.FirstOrDefault();
         }
 
         private SessionData GetSessionHostData(MySqlConnection conn, string hostKey)
@@ -389,8 +389,8 @@ select
 from `SessionInfo` s
 where s.`HostKey` = @HostKey";
 
-            var data = conn.QuerySingle<SessionData>(sql, new { HostKey = hostKey });
-            return data;
+            var data = conn.Query<SessionData>(sql, new { HostKey = hostKey });
+            return data.FirstOrDefault();
         }
 
         private class SessionData
