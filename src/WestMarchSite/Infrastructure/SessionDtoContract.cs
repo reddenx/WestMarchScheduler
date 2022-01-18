@@ -56,33 +56,22 @@ namespace WestMarchSite.Infrastructure
     public class SessionDto
     {
         //probably best to keep these only on the entity
-        //public string PlayerKey { get; set; }
-        //public string HostKey { get; set; }
-        //public string LeadKey { get; set; }
+        public string PlayerKey { get; set; }
+        public string HostKey { get; set; }
+        public string LeadKey { get; set; }
 
         public SessionStatusDto Status { get; set; }
-
-        public HostDto Host { get; set; }
-        public string LeadName { get; set; }
-
-        public SessionScheduleDateDto[] OpenSchedule { get; set; }
 
         public string Title { get; set; }
         public string Description { get; set; }
         //public DateTime PostDate { get; set; }
 
+        public PlayerDto Lead { get; set; }
+        public PlayerDto Host { get; set; }
         public PlayerDto[] Players { get; set; }
 
-        public class HostDto
-        {
-            public string Name { get; set; }
-            public SessionScheduleDateDto[] Schedule { get; set; }
-        }
-        public class LeadDto
-        {
-            public string Name { get; set; }
-            public SessionScheduleDateDto[] Schedule { get; set; }
-        }
+        public SessionScheduleDateDto[] FinalizedSchedule { get; set; }
+
         public class PlayerDto
         {
             public string Name { get; set; }

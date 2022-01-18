@@ -180,7 +180,7 @@ namespace WestMarchSite.Application
             try
             {
                 var sessionResult = _repo.GetSessionHostKey(hostKey);
-                return ToDto(sessionResult);
+                return ToDto(hostKey, sessionResult);
             }
             catch
             {
@@ -193,7 +193,7 @@ namespace WestMarchSite.Application
             try
             {
                 var sessionResult = _repo.GetSessionLeadKey(leadKey);
-                return ToDto(sessionResult);
+                return ToDto(leadKey, sessionResult);
             }
             catch
             {
@@ -206,7 +206,7 @@ namespace WestMarchSite.Application
             try
             {
                 var sessionResult = _repo.GetSessionPlayerKey(playerKey);
-                return ToDto(sessionResult);
+                return ToDto(playerKey, sessionResult);
             }
             catch
             {
@@ -238,7 +238,7 @@ namespace WestMarchSite.Application
                 ).ToArray());
         }
 
-        private FetchResult<SessionDto> ToDto(SessionRepository.QueryResult<SessionEntity> sessionResult)
+        private FetchResult<SessionDto> ToDto(string getKey, SessionRepository.QueryResult<SessionEntity> sessionResult)
         {
             switch (sessionResult.Error)
             {
@@ -247,7 +247,7 @@ namespace WestMarchSite.Application
                 case SessionRepository.QueryResultErrors.Technical:
                     return new FetchResult<SessionDto>(FetchResultErrors.Technical);
                 case null:
-                    var dto = ToDto(sessionResult.Result);
+                    var dto = ToDto(getKey, sessionResult.Result);
                     return new FetchResult<SessionDto>(dto);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(sessionResult));
@@ -267,22 +267,46 @@ namespace WestMarchSite.Application
             }
         }
 
-        private SessionDto ToDto(SessionEntity session)
+        private SessionDto ToDto(string getKey, SessionEntity session)
         {
-            return new SessionDto
+            var dto = new SessionDto
             {
+                HostKey = session.HostKey,
+                LeadKey = session.LeadKey,
+                PlayerKey = session.PlayerKey,
+
+                Status = ToDto(session.SessionState),
+
+                Title = session.Title,
                 Description = session.Description,
-                Host = new SessionDto.HostDto
+                //post date
+
+                Lead = new SessionDto.PlayerDto
+                {
+                    Name = session.LeadName,
+                    Schedule = ToDto(session.LeadSchedule),
+                },
+                Host = new SessionDto.PlayerDto
                 {
                     Name = session.HostName,
                     Schedule = ToDto(session.HostSchedule),
                 },
-                LeadName = session.LeadName,
-                OpenSchedule = ToDto(session.LeadSchedule),
-                Status = ToDto(session.SessionState),
-                Title = session.Title,
-                Players = session.Players.Select(p => ToDto(p)).ToArray()
+                Players = session.Players.Select(p => ToDto(p)).ToArray(),
+
+                FinalizedSchedule = ToDto(session.FinalizedSchedule),
             };
+
+            if(getKey == session.PlayerKey)
+            {
+                dto.HostKey = null;
+                dto.LeadKey = null;
+            }
+            if(getKey == session.HostKey)
+            {
+                dto.LeadKey = null;
+            }
+
+            return dto;
         }
 
         private SessionDto.PlayerDto ToDto(Player player)
