@@ -18,14 +18,48 @@ namespace WestMarchSite.Controllers
             _sessionService = sessionService;
         }
 
+        [HttpGet("{key}")]
+        [ProducesResponseType(typeof(SessionDto), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult GetSession([FromRoute] string key)
+        {
+            var playerResult = _sessionService.GetPlayerSession(key);
+            if (playerResult.IsSuccess)
+            {
+                return Json(playerResult.Result);
+            }
+            else if (playerResult.Error != SessionService.FetchResultErrors.NotFound)
+            {
+                return MapError(playerResult.Error);
+            }
+
+            var leadResult = _sessionService.GetLeadSession(key);
+            if (leadResult.IsSuccess)
+            {
+                return Json(leadResult.Result);
+            }
+            else if (leadResult.Error != SessionService.FetchResultErrors.NotFound)
+            {
+                return MapError(leadResult.Error);
+            }
+
+            var hostResult = _sessionService.GetLeadSession(key);
+            if (hostResult.IsSuccess)
+            {
+                return Json(hostResult.Result);
+            }
+            return MapError(hostResult.Error);
+        }
+
         [HttpGet("{key}/host")]
         [ProducesResponseType(200, Type = typeof(SessionDto))]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult GetHostSession([FromRoute]string key)
+        public IActionResult GetHostSession([FromRoute] string key)
         {
             var result = _sessionService.GetHostSession(key);
-            if(result.IsSuccess)
+            if (result.IsSuccess)
             {
                 return Json(result.Result);
             }
@@ -68,10 +102,10 @@ namespace WestMarchSite.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult CreateSession([FromBody]CreateSessionDto create)
+        public IActionResult CreateSession([FromBody] CreateSessionDto create)
         {
             var result = _sessionService.StartSession(create);
-            if(result.IsSuccess)
+            if (result.IsSuccess)
             {
                 return Json(result.Result);
             }
@@ -84,7 +118,7 @@ namespace WestMarchSite.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult ApproveSession([FromRoute]string key, [FromBody]ApproveSessionDto approval)
+        public IActionResult ApproveSession([FromRoute] string key, [FromBody] ApproveSessionDto approval)
         {
             var result = _sessionService.HostApproveSession(key, approval);
             if (result.IsSuccess)
@@ -100,7 +134,7 @@ namespace WestMarchSite.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult LeadSchedule([FromRoute]string key, [FromBody]LeadScheduleDto lead)
+        public IActionResult LeadSchedule([FromRoute] string key, [FromBody] LeadScheduleDto lead)
         {
             var result = _sessionService.LeadNarrowsSchedule(key, lead);
             if (result.IsSuccess)
@@ -116,7 +150,7 @@ namespace WestMarchSite.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult PlayerJoin([FromRoute]string key, [FromBody]PlayerJoinDto join)
+        public IActionResult PlayerJoin([FromRoute] string key, [FromBody] PlayerJoinDto join)
         {
             var result = _sessionService.PlayerJoinSession(key, join);
             if (result.IsSuccess)
@@ -132,7 +166,7 @@ namespace WestMarchSite.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult Finalize([FromRoute]string key, [FromBody]HostFinalizeDto finalize)
+        public IActionResult Finalize([FromRoute] string key, [FromBody] HostFinalizeDto finalize)
         {
             var result = _sessionService.HostFinalizes(key, finalize);
             if (result.IsSuccess)

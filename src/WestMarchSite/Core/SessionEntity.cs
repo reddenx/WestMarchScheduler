@@ -17,11 +17,10 @@ namespace WestMarchSite.Core
         public string Title { get; private set; }
         public string Description { get; private set; }
 
-        public string LeadName { get; private set; }
-
         public string HostName { get; private set; }
         public SessionSchedule HostSchedule { get; private set; }
 
+        public string LeadName { get; private set; }
         public SessionSchedule LeadSchedule { get; private set; }
 
         public IEnumerable<Player> Players => _playerList;
