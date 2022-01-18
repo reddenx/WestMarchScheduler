@@ -44,7 +44,7 @@ namespace WestMarchSite.Controllers
                 return MapError(leadResult.Error);
             }
 
-            var hostResult = _sessionService.GetLeadSession(key);
+            var hostResult = _sessionService.GetHostSession(key);
             if (hostResult.IsSuccess)
             {
                 return Json(hostResult.Result);

@@ -12,12 +12,10 @@ const routes = [
     component: HomePage
   },
   {
-    path: '/:id/*',
-    component: StatusPage
-  },
-  {
-    path: '*',
-    redirect: '/'
+    path: '/:lookupKey',
+    name: 'Status',
+    component: StatusPage,
+    props: true,
   }
 ]
 
