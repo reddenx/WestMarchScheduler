@@ -88,7 +88,7 @@ export default class Api {
      * @param {String} name 
      * @param {String} title 
      * @param {String} description 
-     * @returns {SessionDto}
+     * @returns {KeyBundleDto}
      */
     async createSession(name, title, description) {
         try {
