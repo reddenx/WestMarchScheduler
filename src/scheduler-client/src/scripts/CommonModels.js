@@ -12,11 +12,9 @@ export class ScheduleViewmodel {
 export class PlayerViewmodel {
     /**
      * 
-     * @param {String} type lead, host, or player
      * @param {PlayerDto} dto 
      */
-    constructor(type, dto) {
-        this.type = type;
+    constructor(dto) {
         this.name = dto.name;
         this.schedule = new ScheduleViewmodel(dto.schedule);
 
@@ -37,13 +35,6 @@ export class SessionViewmodel {
         this.playerKey = dto.playerKey;
         /** @type {String} lead, host, player, or unknown */
         this.lookupType = 'unknown';
-        if (lookupKey == dto.leadKey) {
-            this.lookupType = 'lead';
-        } else if (lookupKey == dto.hostKey) {
-            this.lookupType = 'host';
-        } else if (lookupKey == dto.playerKey) {
-            this.lookupType = 'player';
-        }
 
         this.status = dto.status;
         this.title = dto.title;
@@ -53,6 +44,14 @@ export class SessionViewmodel {
         this.players = dto.players && dto.players.map(p => new PlayerViewmodel(p));
         this.finalSchedule = new ScheduleViewmodel(dto.finalSchedule);
 
+
+        if (lookupKey == dto.leadKey) {
+            this.lookupType = 'lead';
+        } else if (lookupKey == dto.hostKey) {
+            this.lookupType = 'host';
+        } else if (lookupKey == dto.playerKey) {
+            this.lookupType = 'player';
+        }
         this.dto = dto;
     }
 }

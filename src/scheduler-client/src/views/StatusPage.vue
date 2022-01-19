@@ -1,21 +1,51 @@
 <template>
-    <div>Status: {{ lookupKey }}</div>
+  <div class="container mt-3">
+    <div class="row">
+      <div class="col-12">
+        <status-component :session="session" />
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
 import Api from "../scripts/SessionApi";
-import {SessionViewmodel, PlayerViewmodel, ScheduleViewmodel} from "../scripts/CommonModels";
+import {
+  SessionViewmodel,
+  PlayerViewmodel,
+  ScheduleViewmodel,
+} from "../scripts/CommonModels";
+import StatusComponent from "../components/StatusComponent.vue";
 
 const api = new Api();
 
 export default {
-    props: {
-        lookupKey: String,
+  components: { StatusComponent },
+
+  props: {
+    lookupKey: String,
+  },
+  watch: {
+    lookupKey() {
+      this.loadData();
     },
-    async mounted() {
-        let dto = await api.getSession(this.lookupKey);
-        console.log(dto);
+  },
+  data() {
+    return {
+      /** @type {SessionViewmodel} */
+      session: {},
+    };
+  },
+  async mounted() {
+    await this.loadData();
+  },
+  methods: {
+    async loadData() {
+      let dto = await api.getSession(this.lookupKey);
+      this.session = new SessionViewmodel(dto, this.lookupKey);
+      document.title = `${this.session.title} (${this.session.lookupType})`;
     },
+  },
 };
 </script>
 

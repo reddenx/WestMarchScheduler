@@ -281,20 +281,26 @@ namespace WestMarchSite.Application
                 Description = session.Description,
                 //post date
 
-                Lead = new SessionDto.PlayerDto
-                {
-                    Name = session.LeadName,
-                    Schedule = ToDto(session.LeadSchedule),
-                },
-                Host = new SessionDto.PlayerDto
-                {
-                    Name = session.HostName,
-                    Schedule = ToDto(session.HostSchedule),
-                },
                 Players = session.Players.Select(p => ToDto(p)).ToArray(),
 
                 FinalizedSchedule = ToDto(session.FinalizedSchedule),
             };
+            if (session.LeadName != null)
+            {
+                dto.Lead = new SessionDto.PlayerDto
+                {
+                    Name = session.LeadName,
+                    Schedule = ToDto(session.LeadSchedule),
+                };
+            }
+            if(session.HostName != null) 
+            {
+                dto.Host = new SessionDto.PlayerDto
+                {
+                    Name = session.HostName,
+                    Schedule = ToDto(session.HostSchedule),
+                };
+            }
 
             if(getKey == session.PlayerKey)
             {
