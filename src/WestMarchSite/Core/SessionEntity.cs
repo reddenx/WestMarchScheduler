@@ -16,6 +16,7 @@ namespace WestMarchSite.Core
 
         public string Title { get; private set; }
         public string Description { get; private set; }
+        public TimeResolutions Resolution { get; private set; }
 
         public string HostName { get; private set; }
         public SessionSchedule HostSchedule { get; private set; }
@@ -110,7 +111,7 @@ namespace WestMarchSite.Core
             }
         }
 
-        public void SetInfo(string title, string description)
+        public void SetInfo(string title, string description, TimeResolutions resolution)
         {
             if (!string.IsNullOrWhiteSpace(this.Title))
                 this._validationErrors.Add("title already populated");
@@ -124,6 +125,7 @@ namespace WestMarchSite.Core
             {
                 this.Title = title;
                 this.Description = description;
+                this.Resolution = resolution;
             }
         }
 
@@ -197,5 +199,13 @@ namespace WestMarchSite.Core
         Approved,
         Open,
         Finalized
+    }
+
+    public enum TimeResolutions
+    {
+        Precise,
+        Hour,
+        HalfDay,
+        Day,
     }
 }

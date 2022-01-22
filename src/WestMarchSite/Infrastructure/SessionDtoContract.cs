@@ -10,6 +10,7 @@ namespace WestMarchSite.Infrastructure
         public string Name { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public string Resolution { get; set; }
     }
 
     public class CreateSessionResultDto
@@ -64,6 +65,7 @@ namespace WestMarchSite.Infrastructure
 
         public string Title { get; set; }
         public string Description { get; set; }
+        public string Resolution { get; set; }
         //public DateTime PostDate { get; set; }
 
         public PlayerDto Lead { get; set; }
