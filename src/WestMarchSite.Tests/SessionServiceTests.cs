@@ -23,7 +23,8 @@ namespace WestMarchSite.Tests
             {
                 Description = "desc",
                 Name = "name",
-                Title = "title"
+                Title = "title",
+                Resolution = "halfday"
             });
 
             Assert.IsTrue(result.IsSuccess);
@@ -31,15 +32,17 @@ namespace WestMarchSite.Tests
         }
 
         [TestMethod]
-        [DataRow("something", "something", null)]
-        [DataRow("something", "something", "")]
-        [DataRow("something", null, "something")]
-        [DataRow("something", "", "something")]
-        [DataRow(null, "something", "something")]
-        [DataRow("", "something", "something")]
-        [DataRow("", "", "")]
-        [DataRow(null, null, null)]
-        public void CreateSessionInvalid(string description, string name, string title)
+        [DataRow("something", "something", null, "day")]
+        [DataRow("something", "something", "", "day")]
+        [DataRow("something", null, "something", "day")]
+        [DataRow("something", "", "something", "day")]
+        [DataRow(null, "something", "something", "day")]
+        [DataRow("", "something", "something", "day")]
+        [DataRow("something", "something", "something", null)]
+        [DataRow("something", "something", "something", "")]
+        [DataRow("", "", "", "")]
+        [DataRow(null, null, null, null)]
+        public void CreateSessionInvalid(string description, string name, string title, string resolution)
         {
             var repo = new Mock<ISessionRepository>();
             repo.Setup(r => r.Save(It.IsAny<SessionEntity>()))
@@ -53,7 +56,8 @@ namespace WestMarchSite.Tests
             {
                 Description = description,
                 Name = name,
-                Title = title
+                Title = title,
+                Resolution = resolution,
             });
 
             Assert.AreEqual(result.Error, SessionService.SetResultErrors.InvalidInput, "all inputs should be invalid");
@@ -63,7 +67,7 @@ namespace WestMarchSite.Tests
         public void HostApproveSession()
         {
             var session = new SessionEntity();
-            session.SetInfo("title", "descrip");
+            session.SetInfo("title", "descrip", TimeResolutions.Day);
             session.SetLead("sean");
             session.ProgressState();
             Assert.AreEqual(session.SessionState, SessionStates.UnApproved);
@@ -101,7 +105,7 @@ namespace WestMarchSite.Tests
         public void HostApproveSessionInvalidName(string hostname)
         {
             var session = new SessionEntity();
-            session.SetInfo("title", "descrip");
+            session.SetInfo("title", "descrip", TimeResolutions.Day);
             session.SetLead("sean");
             session.ProgressState();
             Assert.AreEqual(session.SessionState, SessionStates.UnApproved);
@@ -135,7 +139,7 @@ namespace WestMarchSite.Tests
         public void HostApproveSessionInvalidDate()
         {
             var session = new SessionEntity();
-            session.SetInfo("title", "descrip");
+            session.SetInfo("title", "descrip", TimeResolutions.Day);
             session.SetLead("sean");
             session.ProgressState();
             Assert.AreEqual(session.SessionState, SessionStates.UnApproved);
@@ -163,7 +167,7 @@ namespace WestMarchSite.Tests
         public void LeadNarrowsSchedule()
         {
             var session = new SessionEntity();
-            session.SetInfo("title", "descrip");
+            session.SetInfo("title", "descrip", TimeResolutions.Day);
             session.SetLead("lead");
             session.ProgressState();
             session.SetHost("host");
@@ -193,7 +197,7 @@ namespace WestMarchSite.Tests
         public void LeadNarrowsScheduleInvalidSchedule()
         {
             var session = new SessionEntity();
-            session.SetInfo("title", "descrip");
+            session.SetInfo("title", "descrip", TimeResolutions.Day);
             session.SetLead("lead");
             session.ProgressState();
             session.SetHost("host");
@@ -223,7 +227,7 @@ namespace WestMarchSite.Tests
         public void PlayerJoinSession()
         {
             var session = new SessionEntity();
-            session.SetInfo("title", "descrip");
+            session.SetInfo("title", "descrip", TimeResolutions.Day);
             session.SetLead("lead");
             session.ProgressState();
             session.SetHost("host");
@@ -256,7 +260,7 @@ namespace WestMarchSite.Tests
         public void PlayerJoinSessionInvalidName()
         {
             var session = new SessionEntity();
-            session.SetInfo("title", "descrip");
+            session.SetInfo("title", "descrip", TimeResolutions.Day);
             session.SetLead("lead");
             session.ProgressState();
             session.SetHost("host");
@@ -288,7 +292,7 @@ namespace WestMarchSite.Tests
         public void PlayerJoinSessionInvalidSchedule()
         {
             var session = new SessionEntity();
-            session.SetInfo("title", "descrip");
+            session.SetInfo("title", "descrip", TimeResolutions.Day);
             session.SetLead("lead");
             session.ProgressState();
             session.SetHost("host");
@@ -320,7 +324,7 @@ namespace WestMarchSite.Tests
         public void HostFinalizes()
         {
             var session = new SessionEntity();
-            session.SetInfo("title", "descrip");
+            session.SetInfo("title", "descrip", TimeResolutions.Day);
             session.SetLead("lead");
             session.ProgressState();
             session.SetHost("host");
@@ -352,7 +356,7 @@ namespace WestMarchSite.Tests
         public void HostFinalizesInvalidSchedule()
         {
             var session = new SessionEntity();
-            session.SetInfo("title", "descrip");
+            session.SetInfo("title", "descrip", TimeResolutions.Day);
             session.SetLead("lead");
             session.ProgressState();
             session.SetHost("host");

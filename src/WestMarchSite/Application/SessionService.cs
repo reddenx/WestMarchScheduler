@@ -34,7 +34,17 @@ namespace WestMarchSite.Application
         {
             var newSession = new SessionEntity();
 
-            newSession.SetInfo(createDto.Title, createDto.Description);
+            TimeResolutions resolution;
+            try
+            {
+                resolution = ToApp(createDto.Resolution);
+            }
+            catch
+            {
+                return new SetResult<CreateSessionResultDto>(SetResultErrors.InvalidInput);
+            }
+
+            newSession.SetInfo(createDto.Title, createDto.Description, resolution);
             newSession.SetLead(createDto.Name);
             newSession.ProgressState();
 
@@ -56,6 +66,40 @@ namespace WestMarchSite.Application
                 PlayerKey = newSession.PlayerKey,
             };
             return new SetResult<CreateSessionResultDto>(dto);
+        }
+
+        private TimeResolutions ToApp(string resolution)
+        {
+            switch (resolution)
+            {
+                case "precise":
+                    return TimeResolutions.Precise;
+                case "hour":
+                    return TimeResolutions.Hour;
+                case "halfday":
+                    return TimeResolutions.HalfDay;
+                case "day":
+                    return TimeResolutions.Day;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(resolution), resolution, "could not parse db string value into TimeResolutions");
+            }
+        }
+
+        private string ToDto(TimeResolutions resolution)
+        {
+            switch (resolution)
+            {
+                case TimeResolutions.Precise:
+                    return "precise";
+                case TimeResolutions.Hour:
+                    return "hour";
+                case TimeResolutions.HalfDay:
+                    return "halfday";
+                case TimeResolutions.Day:
+                    return "day";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(resolution), resolution, "could not parse db string value into TimeResolutions");
+            }
         }
 
         public SetResult<ApproveSessionResultDto> HostApproveSession(string hostKey, ApproveSessionDto approvalDto)
@@ -279,6 +323,7 @@ namespace WestMarchSite.Application
 
                 Title = session.Title,
                 Description = session.Description,
+                Resolution = ToDto(session.Resolution),
                 //post date
 
                 Lead = new SessionDto.PlayerDto
