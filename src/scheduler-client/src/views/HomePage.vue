@@ -7,6 +7,7 @@
           <create-component
             @create="handleCreate"
             :disabled="createFormDisabled"
+            :error-message="createFormErrorMessage"
           />
         </div>
       </div>
@@ -27,13 +28,15 @@ export default {
   data() {
     return {
       createFormDisabled: false,
+      createFormErrorMessage: '',
     };
   },
   methods: {
     /** @param {CreateEventData} createData */
     async handleCreate(createData) {
+      this.createFormErrorMessage = '';
       this.createFormDisabled = true;
-      console.log("test");
+      
       if (createData.name && createData.title && createData.description) {
         let keys = await api.createSession(
           createData.name,
@@ -42,6 +45,8 @@ export default {
         );
         if (keys) {
           this.$router.push({ path: `/${keys.leadKey}` });
+        } else {
+          this.createFormErrorMessage = 'failed to create keys';
         }
       }
       this.createFormDisabled = false;

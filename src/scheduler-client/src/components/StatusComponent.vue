@@ -16,7 +16,12 @@
           </p>
           <hr />
           <div v-if="session.lookupType === 'lead'">
-            You're leading this scheduling process
+            <div v-if="session.status === 'Posted'">
+              Pass this link off to your host so they can set their schedule
+              <router-link class="alert-link" :to="`/${session.hostKey}`">{{
+                session.hostKey
+              }}</router-link>
+            </div>
             <SetLeadScheduleComponent v-if="session.status === 'Approved'" />
             <hr />
           </div>
@@ -33,14 +38,13 @@
           </div>
 
           <div class="text-start">
-            <div class="alert alert-danger">
+            <div class="alert alert-danger" v-show="session.leadKey">
               Lead Link:
-
               <router-link class="alert-link" :to="`/${session.leadKey}`">{{
                 session.leadKey
               }}</router-link>
             </div>
-            <div class="alert alert-warning">
+            <div class="alert alert-warning" v-show="session.hostKey">
               Host Link:
               <router-link class="alert-link" :to="`/${session.hostKey}`">{{
                 session.hostKey

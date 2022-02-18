@@ -41,6 +41,7 @@
                 Create
               </button>
             </div>
+            <div class="mt-3 alert alert-danger" v-show="errorMessage">There was an error creating your event</div>
           </form>
         </div>
       </div>
@@ -65,6 +66,7 @@ export class CreateEventData {
 export default {
   props: {
     disabled: Boolean,
+    errorMessage: String,
   },
   data() {
     return {
