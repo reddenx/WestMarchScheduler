@@ -15,6 +15,7 @@
             {{ session.description }}
           </p>
           <hr />
+
           <div v-if="session.lookupType === 'lead'">
             <div v-if="session.status === 'Posted'">
               Pass this link off to your host so they can set their schedule
@@ -23,16 +24,30 @@
               }}</router-link>
             </div>
             <SetLeadScheduleComponent v-if="session.status === 'Approved'" />
-            <hr />
-          </div>
-          <div v-if="session.lookupType === 'host'">
-            You're hosting
-            <SetHostScheduleComponent v-if="session.status === 'Posted'" />
             <FinalizeComponent v-if="session.status === 'Open'" />
             <hr />
           </div>
+
+          <div v-if="session.lookupType === 'host'">
+            <SetHostScheduleComponent
+              :hostKey="session.hostKey"
+              v-if="session.status === 'Posted'"
+              @approved="handleApproved"
+            />
+            <div class="" v-if="session.status === 'Approved'">
+              Let your organizer know that you've approved the event!
+            </div>
+            <FinalizeComponent v-if="session.status === 'Open'" />
+            <hr />
+          </div>
+
           <div v-if="session.lookupType === 'player'">
-            You're participating
+            <div v-if="session.status === 'Posted'">
+              This event is waiting for the organizers to setup an initial schedule
+            </div>
+            <div v-if="session.status === 'Approved'">
+              This event is waiting for the organizers to setup an initial schedule
+            </div>
             <PlayerJoinComponent v-if="session.status === 'Open'" />
             <hr />
           </div>
@@ -79,6 +94,11 @@ export default {
   },
   props: {
     session: SessionViewmodel,
+  },
+  methods: {
+    handleApproved() {
+      this.$emit("reload");
+    },
   },
 };
 </script>

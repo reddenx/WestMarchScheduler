@@ -2,7 +2,7 @@
   <div class="container mt-3">
     <div class="row">
       <div class="col-12">
-        <status-component :session="session" />
+        <status-component :session="session" @reload="handleReload" />
       </div>
     </div>
   </div>
@@ -45,6 +45,9 @@ export default {
       this.session = new SessionViewmodel(dto, this.lookupKey);
       document.title = `${this.session.title} (${this.session.lookupType})`;
     },
+    async handleReload() {
+      await this.loadData();
+    }
   },
 };
 </script>

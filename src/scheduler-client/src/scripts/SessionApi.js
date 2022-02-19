@@ -3,7 +3,6 @@ import axios from 'axios';
 
 export class KeyBundleDto {
     /**
-     * 
      * @param {String} hostKey 
      * @param {String} leadKey 
      * @param {String} playerKey 
@@ -15,9 +14,13 @@ export class KeyBundleDto {
     }
 }
 export class ScheduleDatesDto {
-    constructor(obj) {
-        this.start = new Date(obj.start);
-        this.end = new Date(obj.end);
+    /**
+     * @param {Date} start 
+     * @param {Date} end 
+     */
+    constructor(start, end) {
+        this.start = new Date(start);
+        this.end = new Date(end);
     }
 }
 export class PlayerDto {
@@ -28,7 +31,7 @@ export class PlayerDto {
         /** @type {String} */
         this.name = obj.name;
         /** @type {ScheduleDatesDto[]} */
-        this.schedule = obj.schedule && obj.schedule.map(d => new ScheduleDatesDto(d));
+        this.schedule = obj.schedule && obj.schedule.map(d => new ScheduleDatesDto(d.start, d.end));
     }
 }
 export class SessionDto {
@@ -58,7 +61,7 @@ export class SessionDto {
         /** @type {PlayerDto[]} */
         this.players = players && players.map(p => new PlayerDto(p));
         /** @type {ScheduleDatesDto[]} */
-        this.finalSchedule = finalSchedule && finalSchedule.map(d => new ScheduleDatesDto(d));
+        this.finalSchedule = finalSchedule && finalSchedule.map(d => new ScheduleDatesDto(d.start, d.end));
     }
 }
 
@@ -111,8 +114,22 @@ export default class Api {
      * @param {String} key 
      * @param {String} name 
      * @param {ScheduleDatesDto[]} schedule 
+     * @returns {Boolean}
      */
-    async approveSession(key, name, schedule) { }
+    async approveSession(key, name, schedule) {
+        try {
+            let result = await axios.put(`api/sessions/${key}/approve`, {
+                name: name,
+                schedule: schedule.map(s => ({
+                    start: s.start.toISOString(),
+                    end: s.end.toISOString()
+                }))
+            });
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
 
     /**
      * PUT: api/sessions/{key}/schedule

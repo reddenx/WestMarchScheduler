@@ -1,6 +1,7 @@
 <template>
   <div>
-    Set Host Schedule Component
+    Please enter your name and schedule
+    <input type="text" v-model="name" class="form-control mb-2" placeholder="NAME" />
     <ScheduleComponent
       :startDate="startDate"
       :endDate="endDate"
@@ -20,24 +21,27 @@ import ScheduleComponent, {
   ScheduleDaySelections,
 } from "../components/ScheduleComponent.vue";
 import Api, { ScheduleDatesDto } from "../scripts/SessionApi";
+import {
+  TimeSpan,
+  HourBlock,
+  timeSpansToHourBlocks,
+  hourBlocksToTimeSpans,
+} from "../scripts/TimeHelper";
 
 export default {
   components: {
     ScheduleComponent,
   },
+  props: {
+    hostKey: String,
+  },
   data: () => ({
-    startDate: new Date(2022, 0, 0),
-    endDate: new Date(2022, 1, 1),
-    selectableHours: [
-      new Date(2022, 0, 27, 14),
-      new Date(2022, 0, 27, 15),
-      new Date(2022, 0, 27, 16),
-      new Date(2022, 0, 27, 17),
-      new Date(2022, 0, 27, 18),
-      new Date(2022, 0, 27, 19),
-    ],
+    startDate: new Date(),
+    endDate: new Date(),
+    selectableHours: [],
     /** @type {ScheduleDaySelections[]} */
     selectedHours: [],
+    name: '',
   }),
   mounted() {
     let now = new Date();
@@ -63,11 +67,32 @@ export default {
       this.endDate = endDate;
       this.selectableHours = allHours;
     },
-    submitPressed() {
+    async submitPressed() {
+      this.submitting = true;
       let api = new Api();
-      new ScheduleDatesDto()
-      //TODO translate a bunch of hours into time blocks... ick
-      api.approveSession(key, "frank", TODO);
+
+      let hours = [];
+      this.selectedHours.forEach((day) => {
+        day.hours.forEach((hour) => {
+          hours.push(
+            new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate(), hour)
+          );
+        });
+      });
+
+      let spans = hourBlocksToTimeSpans(hours.map((h) => new HourBlock(h)));
+
+      console.log(spans);
+
+      let success = await api.approveSession(
+        this.hostKey,
+        "franks",
+        spans.map((h) => new ScheduleDatesDto(h.start, h.end))
+      );
+      this.submitting = false;
+      if(success) {
+        this.$emit('approved');
+      }
     },
   },
 };

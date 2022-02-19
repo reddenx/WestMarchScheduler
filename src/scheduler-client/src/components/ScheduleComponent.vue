@@ -15,7 +15,13 @@
         >
           {{ day.month }}
         </li>
-        <li class="list-group-item" :key="day.key">
+        <li
+          class="list-group-item"
+          :key="day.key"
+          :class="{
+            'list-group-item-secondary': ['Sun', 'Sat'].includes(day.name),
+          }"
+        >
           <div class="row">
             <div class="col-auto">
               {{ day.name }} {{ day.day }}{{ suffix(day.day) }}
@@ -152,7 +158,7 @@ export default {
   },
   methods: {
     recalculateDays() {
-        this.days = [];
+      this.days = [];
       if (this.startDate > this.endDate) {
         return;
       }
