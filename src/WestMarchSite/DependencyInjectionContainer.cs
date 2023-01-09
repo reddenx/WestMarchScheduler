@@ -17,6 +17,7 @@ namespace WestMarchSite
 
             services.AddSingletonImplicit<SessionRepository>();
             services.AddSingletonImplicit<SessionService>();
+            // services.AddSingletonImplicit<MicrosoftLogger<T>>();
         }
 
 

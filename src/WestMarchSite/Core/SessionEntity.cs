@@ -29,6 +29,7 @@ namespace WestMarchSite.Core
         public SessionSchedule FinalizedSchedule { get; private set; }
 
         public bool IsValid => !_validationErrors.Any();
+        public string[] ValidationErrors => _validationErrors.ToArray();
 
         private List<string> _validationErrors;
 
