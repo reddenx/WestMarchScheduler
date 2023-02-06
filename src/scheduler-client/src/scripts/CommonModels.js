@@ -1,11 +1,25 @@
 import { SessionDto, PlayerDto, ScheduleDatesDto } from './SessionApi'
 
+export class TimeSegment {
+    /**
+     * 
+     * @param {Date} start 
+     * @param {Date} end 
+     */
+    constructor(start, end) {
+        this.start = start;
+        this.end = end;
+    }
+}
+
 export class ScheduleViewmodel {
     /**
      * 
      * @param {ScheduleDatesDto[]} dto 
      */
     constructor(dto) {
+        /** @type {TimeSegment[]}*/
+        this.dates = dto.map(d => new TimeSegment(d.start, d.end));
     }
 }
 
@@ -16,7 +30,11 @@ export class PlayerViewmodel {
      */
     constructor(dto) {
         this.name = dto.name;
-        this.schedule = new ScheduleViewmodel(dto.schedule);
+        /** @type {ScheduleViewmodel} */
+        this.schedule = null;
+        if (dto.schedule) {
+            this.schedule = new ScheduleViewmodel(dto.schedule);
+        }
 
         this.dto = dto;
     }
@@ -42,7 +60,9 @@ export class SessionViewmodel {
         this.host = dto.host && new PlayerViewmodel(dto.host);
         this.lead = dto.lead && new PlayerViewmodel(dto.lead);
         this.players = dto.players && dto.players.map(p => new PlayerViewmodel(p));
-        this.finalSchedule = new ScheduleViewmodel(dto.finalSchedule);
+        /** @type {ScheduleViewmodel} */        
+        this.finalSchedule = null;
+        dto.finalSchedule && (this.finalSchedule = new ScheduleViewmodel(dto.finalSchedule));
 
 
         if (lookupKey == dto.leadKey) {

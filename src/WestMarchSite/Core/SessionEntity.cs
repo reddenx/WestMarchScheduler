@@ -146,6 +146,8 @@ namespace WestMarchSite.Core
                 this._validationErrors.Add("host is already set");
             else if (string.IsNullOrWhiteSpace(hostName))
                 this._validationErrors.Add("hostname can't be empty");
+            else if (string.Compare(this.LeadName, hostName, true) == 0)
+                this._validationErrors.Add("hostname has already been used");
             else
             {
                 this.HostName = hostName;
@@ -177,6 +179,10 @@ namespace WestMarchSite.Core
         {
             if (string.IsNullOrWhiteSpace(name))
                 this._validationErrors.Add("player name must be populated");
+            else if (this.Players.Any(p => string.Compare(p.Name, name, true) == 0 ) 
+                || string.Compare(this.LeadName, name, true) == 0
+                || string.Compare(this.HostName, name, true) == 0)
+                this._validationErrors.Add("player name already taken");
             else if (schedule?.Options?.Any() != true)
                 this._validationErrors.Add("host schedule must be populated");
             else

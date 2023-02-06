@@ -1,7 +1,7 @@
 <template>
   <div class="container mt-3">
     <div class="row">
-      <div class="col-12">
+      <div class="col-12" v-if="session">
         {{ session.status }}
         <status-component :session="session" @reload="handleReload" />
       </div>
@@ -34,7 +34,7 @@ export default {
   data() {
     return {
       /** @type {SessionViewmodel} */
-      session: {},
+      session: null,
     };
   },
   async mounted() {

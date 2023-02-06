@@ -23,17 +23,15 @@
                 session.hostKey
               }}</router-link>
             </div>
-            <SetLeadScheduleComponent v-if="session.status === 'Approved'" />
+            <SetLeadScheduleComponent :session="session" v-if="session.status === 'Approved'"
+              @submitted="handleLeadScheduled" />
             <FinalizeComponent v-if="session.status === 'Open'" />
             <hr />
           </div>
 
           <div v-if="session.lookupType === 'host'">
-            <SetHostScheduleComponent
-              :hostKey="session.hostKey"
-              v-if="session.status === 'Posted'"
-              @approved="handleApproved"
-            />
+            <SetHostScheduleComponent :hostKey="session.hostKey" v-if="session.status === 'Posted'"
+              @submitted="handleHostApproved" />
             <div class="" v-if="session.status === 'Approved'">
               Let your organizer know that you've approved the event!
             </div>
@@ -48,7 +46,7 @@
             <div v-if="session.status === 'Approved'">
               This event is waiting for the organizers to setup an initial schedule
             </div>
-            <PlayerJoinComponent v-if="session.status === 'Open'" />
+            <PlayerJoinComponent :session="session" @submitted="handlePlayerSubmitted" v-if="session.status === 'Open'" />
             <hr />
           </div>
 
@@ -80,8 +78,8 @@
 
 <script>
 import { SessionViewmodel } from "../scripts/CommonModels";
-import SetHostScheduleComponent from "../components/SetHostScheduleComponent";
-import SetLeadScheduleComponent from "../components/SetLeadScheduleComponent";
+import SetHostScheduleComponent from "../components/SetHostScheduleComponent.vue";
+import SetLeadScheduleComponent from "../components/SetLeadScheduleComponent.vue";
 import PlayerJoinComponent from "../components/PlayerJoinComponent";
 import FinalizeComponent from "../components/FinalizeComponent";
 
@@ -96,12 +94,19 @@ export default {
     session: SessionViewmodel,
   },
   methods: {
-    handleApproved() {
+    handleHostApproved() {
       this.$emit("reload");
     },
+    handleLeadScheduled(){
+      this.$emit("reload");
+    },
+    handlePlayerSubmitted() {
+      this.$emit("reload");
+    }
   },
 };
 </script>
 
 <style>
+
 </style>

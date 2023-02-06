@@ -26,7 +26,15 @@ export class HourBlock {
  * @param {TimeSpan[]} timespans 
  * @returns {HourBlock[]}
  */
-export function timeSpansToHourBlocks(timespans) { }
+export function timeSpansToHourBlocks(timespans) {
+    let blocks = [];
+    timespans.forEach(s => {
+        for (let i = s.start.getHours(); i < s.end.getHours(); ++i) {
+            blocks.push(new HourBlock(new Date(s.start.getFullYear(), s.start.getMonth(), s.start.getDate(), i)));
+        }
+    })
+    return blocks;
+}
 
 /**
  * @param {HourBlock[]} hourblocks

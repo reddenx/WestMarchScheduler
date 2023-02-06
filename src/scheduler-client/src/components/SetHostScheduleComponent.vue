@@ -20,7 +20,7 @@
 import ScheduleComponent, {
   ScheduleDaySelections,
 } from "../components/ScheduleComponent.vue";
-import Api, { ScheduleDatesDto } from "../scripts/SessionApi";
+import Api, { ScheduleDatesInputDto } from "../scripts/SessionApi";
 import {
   TimeSpan,
   HourBlock,
@@ -42,6 +42,7 @@ export default {
     /** @type {ScheduleDaySelections[]} */
     selectedHours: [],
     name: '',
+    submitting: false
   }),
   mounted() {
     let now = new Date();
@@ -86,12 +87,12 @@ export default {
 
       let success = await api.approveSession(
         this.hostKey,
-        "franks",
-        spans.map((h) => new ScheduleDatesDto(h.start, h.end))
+        this.name,
+        spans.map((h) => new ScheduleDatesInputDto(h.start, h.end))
       );
       this.submitting = false;
       if(success) {
-        this.$emit('approved');
+        this.$emit('submitted');
       }
     },
   },

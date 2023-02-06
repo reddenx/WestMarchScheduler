@@ -1,6 +1,16 @@
 import 'axios';
 import axios from 'axios';
 
+/**
+ * 
+ * @param {String} s 
+ * @returns {Date}
+ */
+function parseISOString(s) {
+    var b = s.split(/\D+/);
+    return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5]));
+}
+
 export class KeyBundleDto {
     /**
      * @param {String} hostKey 
@@ -13,7 +23,7 @@ export class KeyBundleDto {
         this.playerKey = playerKey;
     }
 }
-export class ScheduleDatesDto {
+export class ScheduleDatesInputDto {
     /**
      * @param {Date} start 
      * @param {Date} end 
@@ -21,6 +31,19 @@ export class ScheduleDatesDto {
     constructor(start, end) {
         this.start = new Date(start);
         this.end = new Date(end);
+    }
+}
+export class ScheduleDatesDto {
+    /**
+     * @param {String} start 
+     * @param {String} end 
+     */
+    constructor(start, end) {
+        console.log("test");
+        /** @type {Date} */
+        this.start = parseISOString(start);
+        /** @type {Date} */
+        this.end = parseISOString(end);
     }
 }
 export class PlayerDto {
@@ -113,7 +136,7 @@ export default class Api {
      * PUT: api/session/{key}/approve
      * @param {String} key 
      * @param {String} name 
-     * @param {ScheduleDatesDto[]} schedule 
+     * @param {ScheduleDatesInputDto[]} schedule 
      * @returns {Boolean}
      */
     async approveSession(key, name, schedule) {
@@ -134,22 +157,35 @@ export default class Api {
     /**
      * PUT: api/sessions/{key}/schedule
      * @param {String} key 
-     * @param {ScheduleDatesDto[]} schedule 
+     * @param {ScheduleDatesInputDto[]} schedule 
+     * @returns {Boolean}
      */
-    async leadSchedule(key, schedule) { }
+    async leadSchedule(key, schedule) {
+        try {
+            let result = await axios.put(`api/sessions/${key}/schedule`, {
+                schedule: schedule.map(s => ({
+                    start: s.start.toISOString(),
+                    end: s.end.toISOString()
+                }))
+            });
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
 
     /**
      * PUT: api/sessions/{key}/join
      * @param {String} key 
      * @param {String} name 
-     * @param {ScheduleDatesDto[]} schedule 
+     * @param {ScheduleDatesInputDto[]} schedule 
      */
     async playerJoin(key, name, schedule) { }
 
     /**
      * PUT: api/sessions/{key}/finalize
      * @param {String} key 
-     * @param {ScheduleDatesDto[]} schedule 
+     * @param {ScheduleDatesInputDto[]} schedule 
      */
     async hostFinalize(key, schedule) { }
 }
