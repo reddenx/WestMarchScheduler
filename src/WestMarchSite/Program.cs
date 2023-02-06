@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Text.Json.Serialization;
 
 namespace WestMarchSite
 {
@@ -25,7 +26,11 @@ namespace WestMarchSite
             //do DI here
             //Startup.ConfigureServices(builder.Services);
             DependencyInjectionContainer.SetupDiContainer(builder.Services, builder.Configuration);
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(o =>
+                {
+                    o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {

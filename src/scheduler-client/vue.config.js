@@ -3,6 +3,6 @@ module.exports = {
     outputDir: "../WestMarchSite/wwwroot/client_app",
     filenameHashing: false,
     devServer: {
-        proxy: 'http://localhost:54903'
+        proxy: 'http://localhost:5002'
     }
 }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WestMarchSite.Core;
 using static WestMarchSite.Infrastructure.SessionRepository;
+using Microsoft.Extensions.Logging;
 
 namespace WestMarchSite.Infrastructure
 {
@@ -25,10 +26,12 @@ namespace WestMarchSite.Infrastructure
     public class SessionRepository : ISessionRepository
     {
         private readonly string _connectionString;
+        private readonly ILogger<SessionRepository> _logger;
 
-        public SessionRepository(ISessionRepositoryConfiguration config)
+        public SessionRepository(ISessionRepositoryConfiguration config, ILogger<SessionRepository> logger)
         {
             _connectionString = config.SessionDbConnectionString;
+            _logger = logger;
         }
 
         public UpdateResult Save(SessionEntity session)
@@ -107,8 +110,9 @@ namespace WestMarchSite.Infrastructure
                 }
                 return new UpdateResult();
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e, "repo failed to save session");
                 return new UpdateResult(UpdateResultErrors.Technical);
             }
         }
@@ -130,8 +134,9 @@ namespace WestMarchSite.Infrastructure
                     return new QueryResult<SessionEntity>(session);
                 }
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e, "repo failed to get session for host");
                 return new QueryResult<SessionEntity>(QueryResultErrors.Technical);
             }
         }
@@ -153,8 +158,9 @@ namespace WestMarchSite.Infrastructure
                     return new QueryResult<SessionEntity>(session);
                 }
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e, "repo failed to get session for lead");
                 return new QueryResult<SessionEntity>(QueryResultErrors.Technical);
             }
         }
@@ -176,8 +182,9 @@ namespace WestMarchSite.Infrastructure
                     return new QueryResult<SessionEntity>(session);
                 }
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e, "repo failed to get session for player");
                 return new QueryResult<SessionEntity>(QueryResultErrors.Technical);
             }
         }
@@ -222,7 +229,7 @@ namespace WestMarchSite.Infrastructure
                         }
 
                         var finalSchedule = schedules.Where(s => s.Name == null).ToArray();
-                        if(finalSchedule?.Any() == true)
+                        if (finalSchedule?.Any() == true)
                         {
                             session.SetFinalSchedule(new SessionSchedule(finalSchedule.Select(s => new SessionScheduleOption(s.Start, s.End)).ToArray()));
                             session.ProgressState();
@@ -238,12 +245,12 @@ namespace WestMarchSite.Infrastructure
         {
             var existingSession = GetSessionHostData(conn, sessionData.HostKey);
 
-            if(existingSession == null)
+            if (existingSession == null)
             {
                 var update = @"
 insert into `SessionInfo` (`HostKey`, `LeadKey`, `PlayerKey`, `Title`, `Description`)
 values (@HostKey, @LeadKey, @PlayerKey, @Title, @Description);";
-                conn.Execute(update, new 
+                conn.Execute(update, new
                 {
                     HostKey = sessionData.HostKey,
                     LeadKey = sessionData.LeadKey,
@@ -260,7 +267,7 @@ set
 	`Title` = @Title,
 	`Description` = @Description
 where `HostKey` = @HostKey;";
-                conn.Execute(insert, new 
+                conn.Execute(insert, new
                 {
                     HostKey = sessionData.HostKey,
                     Title = sessionData.Title,
@@ -276,22 +283,30 @@ where `HostKey` = @HostKey;";
 delete
 from `ScheduleInfo`
 where `HostKey` = @HostKey";
-            conn.Execute(delete, new { HostKey =  hostKey});
+            conn.Execute(delete, new { HostKey = hostKey });
 
             //this is brutally inefficient, TODO fix with TVPs or something later
 
             var insert = @"
 insert into `ScheduleInfo` (`HostKey`, `Name`, `Start`, `End`)
 values (@HostKey, @Name, @Start, @End);";
-            foreach (var schedule in schedules)
+            try
             {
-                conn.Execute(insert, new 
+                foreach (var schedule in schedules)
                 {
-                    HostKey = schedule.HostKey,
-                    Name = schedule.Name,
-                    Start = schedule.Start,
-                    End = schedule.End
-                });
+                    conn.Execute(insert, new
+                    {
+                        HostKey = schedule.HostKey,
+                        Name = schedule.Name,
+                        Start = schedule.Start,
+                        End = schedule.End
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "repo failed to save schedules");
+                throw;
             }
         }
 
@@ -305,14 +320,23 @@ where `HostKey` = @HostKey";
             var insert = @"
 insert into `Player` (`HostKey`, `Name`, `Role`)
 values (@HostKey, @Name, @Role)";
-            foreach (var player in players)
+
+            try 
             {
-                conn.Execute(insert, new
+                foreach (var player in players)
                 {
-                    HostKey = player.HostKey,
-                    Name = player.Name,
-                    Role = player.Role
-                });
+                    conn.Execute(insert, new
+                    {
+                        HostKey = player.HostKey,
+                        Name = player.Name,
+                        Role = player.Role
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "repo failed to save players");
+                throw;
             }
         }
 
@@ -324,7 +348,7 @@ select
     s.`Name`,
     s.`Start`,
     s.`End`
-from `scheduleinfo` s
+from `ScheduleInfo` s
 where s.`HostKey` = @HostKey";
 
             var schedules = conn.Query<SessionScheduleData>(sql, new { HostKey = hostKey });
@@ -338,7 +362,7 @@ select
 	p.`HostKey`,
 	p.`Name`,
     p.`Role`
-from `player` p
+from `Player` p
 where p.`HostKey` = @HostKey";
 
             var players = conn.Query<SessionPlayerData>(sql, new { HostKey = hostKey });
