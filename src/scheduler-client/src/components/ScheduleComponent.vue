@@ -40,7 +40,7 @@
                 }"
                 @click="hourSelected(day, hour)"
               >
-                {{ hour > 12 ? hour % 12 : hour }}
+                {{ hour > 12 ? hour % 12 : hour }} {{ day.otherSelectedCount(hour) }}
               </button>
             </div>
           </div>
@@ -63,8 +63,14 @@ export class ScheduleDaySelections {
 }
 
 class DayViewmodel {
-  /** @param {Date} date */
-  constructor(date, startHour, endHour, selectableHours) {
+  /**
+   * @param {Date} date
+   * @param {Number} startHour
+   * @param {Number} endHour
+   * @param {Number[]} selectableHours
+   * @param {Number[]} othersSelectedHours
+   */
+  constructor(date, startHour, endHour, selectableHours, othersSelectedHours) {
     /** @type {String} */
     this.name = days[date.getDay()];
     this.month = months[date.getMonth()];
@@ -82,6 +88,7 @@ class DayViewmodel {
 
     /** @type {Number[]} */
     this.selectableHours = selectableHours || this.hours;
+    this.othersSelectedHours = othersSelectedHours || [];
 
     this.selectedHours = [];
 
@@ -105,6 +112,10 @@ class DayViewmodel {
 
   selected(hour) {
     return this.selectedHours.includes(hour);
+  }
+
+  otherSelectedCount(hour) {
+    return this.othersSelectedHours.filter(h => h == hour).length;
   }
 }
 
@@ -131,6 +142,7 @@ export default {
     startHour: Number,
     endHour: Number,
     selectableHours: Array,
+    selectedHours: Array,
   },
   data: () => ({
     /** @type {DayViewmodel[]} */
@@ -158,6 +170,7 @@ export default {
   },
   methods: {
     recalculateDays() {
+      /** @type {DayViewmodel} */
       this.days = [];
       if (this.startDate > this.endDate) {
         return;
@@ -171,6 +184,14 @@ export default {
           day: h.getDate(),
           hour: h.getHours(),
         }));
+      let selectedHours =
+        this.selectedHours &&
+        this.selectedHours.map((h) => ({
+          year: h.getYear(),
+          month: h.getMonth(),
+          day: h.getDate(),
+          hour: h.getHours(),
+        }));
       while (start < this.endDate) {
         this.days.push(
           new DayViewmodel(
@@ -179,6 +200,15 @@ export default {
             this.endHour,
             selectableHours &&
               selectableHours
+                .filter(
+                  (h) =>
+                    h.year == start.getYear() &&
+                    h.month == start.getMonth() &&
+                    h.day == start.getDate()
+                )
+                .map((h) => h.hour),
+            selectedHours &&
+              selectedHours
                 .filter(
                   (h) =>
                     h.year == start.getYear() &&
