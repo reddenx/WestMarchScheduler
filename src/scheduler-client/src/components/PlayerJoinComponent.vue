@@ -16,7 +16,12 @@
       v-model="selectedHours"
       :selectedHours="selectedHours"
     />
-    <button class="btn btn-primary mt-2" type="button" @click="submitPressed">
+    <button
+      class="btn btn-primary mt-2"
+      type="button"
+      @click="submitPressed"
+      :disabled="submitting"
+    >
       Submit
     </button>
   </div>
@@ -53,13 +58,13 @@ export default {
   }),
   mounted() {
     this.earliestDate = new Date(
-      Math.min(...this.session.host.schedule.dates.map((d) => d.start))
+      Math.min(...this.session.lead.schedule.dates.map((d) => d.start))
     );
     this.latestDate = new Date(
-      Math.max(...this.session.host.schedule.dates.map((d) => d.end))
+      Math.max(...this.session.lead.schedule.dates.map((d) => d.end))
     );
 
-    let spans = this.session.host.schedule.dates.map(
+    let spans = this.session.lead.schedule.dates.map(
       (d) => new TimeSpan(d.start, d.end)
     );
     let blocks = timeSpansToHourBlocks(spans);
@@ -68,7 +73,7 @@ export default {
     /**@type {SessionViewmodel} */
     let session = this.session;
     let playerSpans = [];
-    
+
     session.players.forEach((p) =>
       playerSpans.push(
         ...p.schedule.dates.map((d) => new TimeSpan(d.start, d.end))
@@ -79,6 +84,8 @@ export default {
   },
   methods: {
     async submitPressed() {
+      this.submitting = true;
+
       let hours = [];
       this.selectedHours.forEach((day) => {
         day.hours.forEach((hour) => {
@@ -95,12 +102,17 @@ export default {
 
       let spans = hourBlocksToTimeSpans(hours.map((h) => new HourBlock(h)));
 
-      var api = new Api();
-      await api.playerJoin(
+      let api = new Api();
+      let success = await api.playerJoin(
         this.session.playerKey,
         this.name,
         spans.map((h) => new ScheduleDatesInputDto(h.start, h.end))
       );
+
+      if(success) {
+        this.$emit('reload');
+      }
+      this.submitting = false;
     },
   },
 };

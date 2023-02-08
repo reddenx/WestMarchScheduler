@@ -33,14 +33,23 @@
                 :key="hour"
                 :disabled="!day.selectable(hour)"
                 :class="{
-                  'btn-primary': day.selected(hour),
+                  'btn-primary': day.selected(hour) && !day.hourMap[hour],
+                  'btn-success': day.selected(hour) && day.hourMap[hour],
                   'btn-outline-secondary':
-                    !day.selected(hour) && day.selectable(hour),
+                    !day.selected(hour) && day.selectable(hour) && !day.hourMap[hour],
+                  'btn-outline-success':
+                    !day.selected(hour) && day.selectable(hour) && day.hourMap[hour],
                   'btn-secondary': !day.selectable(hour),
+                  
                 }"
                 @click="hourSelected(day, hour)"
               >
-                {{ hour > 12 ? hour % 12 : hour }} {{ day.otherSelectedCount(hour) }}
+                {{ hour > 12 ? hour % 12 : hour }}
+                <span
+                  class="badge bg-success"
+                  v-show="day.hourMap[hour]"
+                  >{{ day.otherSelectedCount(hour) }}</span
+                >
               </button>
             </div>
           </div>
@@ -95,6 +104,9 @@ class DayViewmodel {
     this.key = date.toUTCString();
 
     this.date = date;
+
+    this.hourMap = {}
+    selectableHours.forEach(hour => this.hourMap[hour] = this.othersSelectedHours.filter((h) => h == hour).length);
   }
 
   toggle(hour) {
@@ -115,7 +127,7 @@ class DayViewmodel {
   }
 
   otherSelectedCount(hour) {
-    return this.othersSelectedHours.filter(h => h == hour).length;
+    return this.selected(hour) ? this.hourMap[hour] + 1 : this.hourMap[hour];
   }
 }
 

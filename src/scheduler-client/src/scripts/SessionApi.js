@@ -180,12 +180,37 @@ export default class Api {
      * @param {String} name 
      * @param {ScheduleDatesInputDto[]} schedule 
      */
-    async playerJoin(key, name, schedule) { }
+    async playerJoin(key, name, schedule) {
+        try {
+            let result = await axios.put(`api/sessions/${key}/join`, {
+                name: name,
+                schedule: schedule.map(s => ({
+                    start: s.start.toISOString(),
+                    end: s.end.toISOString()
+                }))
+            });
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
 
     /**
      * PUT: api/sessions/{key}/finalize
      * @param {String} key 
      * @param {ScheduleDatesInputDto[]} schedule 
      */
-    async hostFinalize(key, schedule) { }
+    async hostFinalize(key, schedule) {
+        try {
+            let result = await axios.put(`api/sessions/${key}/finalize`, {
+                schedule: schedule.map(s => ({
+                    start: s.start.toISOString(),
+                    end: s.end.toISOString()
+                }))
+            });
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
 }
