@@ -30,7 +30,7 @@
 <script>
 import ScheduleComponent, {
   ScheduleDaySelections,
-} from "../components/ScheduleComponent.vue";
+} from "../components/ScheduleComponent2.vue";
 import { SessionViewmodel } from "../scripts/CommonModels";
 import Api, { ScheduleDatesInputDto } from "../scripts/SessionApi";
 import {

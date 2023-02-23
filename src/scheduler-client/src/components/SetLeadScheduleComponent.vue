@@ -25,7 +25,7 @@
 <script>
 import { SessionViewmodel, ScheduleViewmodel } from "../scripts/CommonModels";
 import Api, { ScheduleDatesInputDto } from "../scripts/SessionApi";
-import ScheduleComponent from "./ScheduleComponent.vue"
+import ScheduleComponent from "./ScheduleComponent2.vue"
 import {
   TimeSpan,
   HourBlock,
@@ -69,8 +69,6 @@ export default {
       });
 
       let spans = hourBlocksToTimeSpans(hours.map((h) => new HourBlock(h)));
-
-      console.log(spans);
 
       let success = await api.leadSchedule(
         this.session.leadKey,

@@ -19,7 +19,7 @@
 <script>
 import ScheduleComponent, {
   ScheduleDaySelections,
-} from "../components/ScheduleComponent.vue";
+} from "../components/ScheduleComponent2.vue";
 import Api, { ScheduleDatesInputDto } from "../scripts/SessionApi";
 import {
   TimeSpan,
@@ -82,8 +82,6 @@ export default {
       });
 
       let spans = hourBlocksToTimeSpans(hours.map((h) => new HourBlock(h)));
-
-      console.log(spans);
 
       let success = await api.approveSession(
         this.hostKey,

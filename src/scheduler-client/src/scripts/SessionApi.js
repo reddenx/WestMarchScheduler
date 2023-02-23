@@ -39,7 +39,6 @@ export class ScheduleDatesDto {
      * @param {String} end 
      */
     constructor(start, end) {
-        console.log("test");
         /** @type {Date} */
         this.start = parseISOString(start);
         /** @type {Date} */
