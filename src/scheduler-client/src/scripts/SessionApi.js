@@ -68,8 +68,9 @@ export class SessionDto {
      * @param {*} lead 
      * @param {*} players 
      * @param {*} finalSchedule 
+     * @param {String} resolution
      */
-    constructor(playerKey, hostKey, leadKey, status, title, description, host, lead, players, finalSchedule) {
+    constructor(playerKey, hostKey, leadKey, status, title, description, host, lead, players, finalSchedule, resolution) {
         this.playerKey = playerKey;
         this.hostKey = hostKey;
         this.leadKey = leadKey;
@@ -84,6 +85,7 @@ export class SessionDto {
         this.players = players && players.map(p => new PlayerDto(p));
         /** @type {ScheduleDatesDto[]} */
         this.finalSchedule = finalSchedule && finalSchedule.map(d => new ScheduleDatesDto(d.start, d.end));
+        this.resolution = resolution;
     }
 }
 
@@ -100,7 +102,7 @@ export default class Api {
             let result = await axios.get('api/sessions/' + key);
             if (result.data) {
                 let d = result.data;
-                return new SessionDto(d.playerKey, d.hostKey, d.leadKey, d.status, d.title, d.description, d.host, d.lead, d.players, d.finalizedSchedule);
+                return new SessionDto(d.playerKey, d.hostKey, d.leadKey, d.status, d.title, d.description, d.host, d.lead, d.players, d.finalizedSchedule, d.resolution);
             }
             return null;
         } catch (error) {
@@ -120,7 +122,8 @@ export default class Api {
             let result = await axios.post('api/sessions', {
                 name: name,
                 title: title,
-                description: description
+                description: description,
+                resolution: 'hour'
             });
             if (result.data) {
                 return new KeyBundleDto(result.data.hostKey, result.data.leadKey, result.data.playerKey);
