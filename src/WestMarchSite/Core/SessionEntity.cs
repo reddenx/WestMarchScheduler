@@ -30,6 +30,7 @@ namespace WestMarchSite.Core
         public SessionSchedule FinalizedSchedule { get; private set; }
 
         public bool IsValid => !_validationErrors.Any();
+        public string[] ValidationErrors => _validationErrors.ToArray();
 
         private List<string> _validationErrors;
 
@@ -147,6 +148,8 @@ namespace WestMarchSite.Core
                 this._validationErrors.Add("host is already set");
             else if (string.IsNullOrWhiteSpace(hostName))
                 this._validationErrors.Add("hostname can't be empty");
+            else if (string.Compare(this.LeadName, hostName, true) == 0)
+                this._validationErrors.Add("hostname has already been taken by lead");
             else
             {
                 this.HostName = hostName;
@@ -156,7 +159,7 @@ namespace WestMarchSite.Core
         public void SetHostSchedule(SessionSchedule schedule)
         {
             if (schedule?.Options?.Any() != true)
-                this._validationErrors.Add("host schedule must be populated");
+                this._validationErrors.Add("cannot set a null host schedule");
             else
             {
                 //can't think of any validation errors? maybe state once it's set
@@ -167,7 +170,7 @@ namespace WestMarchSite.Core
         public void SetLeadSchedule(SessionSchedule schedule)
         {
             if (schedule?.Options?.Any() != true)
-                this._validationErrors.Add("host schedule must be populated");
+                this._validationErrors.Add("host schedule must be populated to add a lead schedule");
             else
             {
                 this.LeadSchedule = schedule;
@@ -178,8 +181,12 @@ namespace WestMarchSite.Core
         {
             if (string.IsNullOrWhiteSpace(name))
                 this._validationErrors.Add("player name must be populated");
+            else if (this.Players.Any(p => string.Compare(p.Name, name, true) == 0 ) 
+                || string.Compare(this.LeadName, name, true) == 0
+                || string.Compare(this.HostName, name, true) == 0)
+                this._validationErrors.Add("player name already taken");
             else if (schedule?.Options?.Any() != true)
-                this._validationErrors.Add("host schedule must be populated");
+                this._validationErrors.Add("player schedule cannot be empty or null");
             else
             {
                 this._playerList.Add(new Player(name, schedule));

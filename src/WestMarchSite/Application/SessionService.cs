@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using WestMarchSite.Core;
 using WestMarchSite.Infrastructure;
 using static WestMarchSite.Application.SessionService;
@@ -23,11 +24,13 @@ namespace WestMarchSite.Application
 
     public class SessionService : ISessionService
     {
+        private readonly ILogger _logger;
         private readonly ISessionRepository _repo;
 
-        public SessionService(ISessionRepository repo)
+        public SessionService(ISessionRepository repo, ILogger<SessionService> logger)
         {
             _repo = repo;
+            _logger = logger;
         }
 
         public SetResult<CreateSessionResultDto> StartSession(CreateSessionDto createDto)
@@ -50,12 +53,14 @@ namespace WestMarchSite.Application
 
             if (!newSession.IsValid)
             {
+                _logger.LogDebug("invalid input", newSession.ValidationErrors);
                 return new SetResult<CreateSessionResultDto>(SetResultErrors.InvalidInput);
             }
 
             var saveResult = _repo.Save(newSession);
             if (!saveResult.IsSuccess)
             {
+                _logger.LogError("unable to save new session", saveResult.Error);
                 return new SetResult<CreateSessionResultDto>(ToApp(saveResult.Error.Value));
             }
 
@@ -326,20 +331,26 @@ namespace WestMarchSite.Application
                 Resolution = ToDto(session.Resolution),
                 //post date
 
-                Lead = new SessionDto.PlayerDto
-                {
-                    Name = session.LeadName,
-                    Schedule = ToDto(session.LeadSchedule),
-                },
-                Host = new SessionDto.PlayerDto
-                {
-                    Name = session.HostName,
-                    Schedule = ToDto(session.HostSchedule),
-                },
                 Players = session.Players.Select(p => ToDto(p)).ToArray(),
 
                 FinalizedSchedule = ToDto(session.FinalizedSchedule),
             };
+            if (session.LeadName != null)
+            {
+                dto.Lead = new SessionDto.PlayerDto
+                {
+                    Name = session.LeadName,
+                    Schedule = ToDto(session.LeadSchedule),
+                };
+            }
+            if(session.HostName != null) 
+            {
+                dto.Host = new SessionDto.PlayerDto
+                {
+                    Name = session.HostName,
+                    Schedule = ToDto(session.HostSchedule),
+                };
+            }
 
             if(getKey == session.PlayerKey)
             {

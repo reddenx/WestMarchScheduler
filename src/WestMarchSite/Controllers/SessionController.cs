@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +13,12 @@ namespace WestMarchSite.Controllers
     public class SessionController : Controller
     {
         private readonly ISessionService _sessionService;
+        private readonly ILogger<SessionController> _logger;
 
-        public SessionController(ISessionService sessionService)
+        public SessionController(ISessionService sessionService, ILogger<SessionController> logger)
         {
             _sessionService = sessionService;
+            _logger = logger;
         }
 
         [HttpGet("{key}")]

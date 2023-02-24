@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
+using Microsoft.Extensions.Logging;
 using WestMarchSite.Application;
 using WestMarchSite.Core;
 using WestMarchSite.Infrastructure;
@@ -14,10 +15,11 @@ namespace WestMarchSite.Tests
         public void CreateSession()
         {
             var repo = new Mock<ISessionRepository>();
+            var logger = new Mock<ILogger<SessionService>>();
             repo.Setup(r => r.Save(It.IsAny<SessionEntity>()))
                 .Returns(new SessionRepository.UpdateResult());
 
-            var app = new SessionService(repo.Object);
+            var app = new SessionService(repo.Object, logger.Object);
 
             var result = app.StartSession(new CreateSessionDto
             {
@@ -45,12 +47,13 @@ namespace WestMarchSite.Tests
         public void CreateSessionInvalid(string description, string name, string title, string resolution)
         {
             var repo = new Mock<ISessionRepository>();
+            var logger = new Mock<ILogger<SessionService>>();
             repo.Setup(r => r.Save(It.IsAny<SessionEntity>()))
                 .Returns(new SessionRepository.UpdateResult());
             repo.Setup(r => r.Save(It.IsAny<SessionEntity>()))
                 .Returns(new SessionRepository.UpdateResult(SessionRepository.UpdateResultErrors.Technical));
 
-            var app = new SessionService(repo.Object);
+            var app = new SessionService(repo.Object, logger.Object);
 
             var result = app.StartSession(new CreateSessionDto
             {
@@ -74,12 +77,13 @@ namespace WestMarchSite.Tests
             Assert.IsTrue(session.IsValid);
 
             var repo = new Mock<ISessionRepository>();
+            var logger = new Mock<ILogger<SessionService>>();
             repo.Setup(r => r.GetSessionHostKey("hostKey"))
                 .Returns(new SessionRepository.QueryResult<SessionEntity>(session));
             repo.Setup(r => r.Save(It.Is<SessionEntity>(e => e.IsValid)))
                 .Returns(new SessionRepository.UpdateResult());
 
-            var app = new SessionService(repo.Object);
+            var app = new SessionService(repo.Object, logger.Object);
 
             var result = app.HostApproveSession("hostKey", new ApproveSessionDto
             {
@@ -112,12 +116,13 @@ namespace WestMarchSite.Tests
             Assert.IsTrue(session.IsValid);
 
             var repo = new Mock<ISessionRepository>();
+            var logger = new Mock<ILogger<SessionService>>();
             repo.Setup(r => r.GetSessionHostKey("hostKey"))
                 .Returns(new SessionRepository.QueryResult<SessionEntity>(session));
             repo.Setup(r => r.Save(It.IsAny<SessionEntity>()))
                 .Returns(new SessionRepository.UpdateResult(SessionRepository.UpdateResultErrors.Technical));
 
-            var app = new SessionService(repo.Object);
+            var app = new SessionService(repo.Object, logger.Object);
 
             var result = app.HostApproveSession("hostKey", new ApproveSessionDto
             {
@@ -146,12 +151,13 @@ namespace WestMarchSite.Tests
             Assert.IsTrue(session.IsValid);
 
             var repo = new Mock<ISessionRepository>();
+            var logger = new Mock<ILogger<SessionService>>();
             repo.Setup(r => r.GetSessionHostKey("hostKey"))
                 .Returns(new SessionRepository.QueryResult<SessionEntity>(session));
             repo.Setup(r => r.Save(It.IsAny<SessionEntity>()))
                 .Returns(new SessionRepository.UpdateResult(SessionRepository.UpdateResultErrors.Technical));
 
-            var app = new SessionService(repo.Object);
+            var app = new SessionService(repo.Object, logger.Object);
 
             var result = app.HostApproveSession("hostKey", new ApproveSessionDto
             {
@@ -177,12 +183,13 @@ namespace WestMarchSite.Tests
             Assert.IsTrue(session.IsValid);
 
             var repo = new Mock<ISessionRepository>();
+            var logger = new Mock<ILogger<SessionService>>();
             repo.Setup(r => r.GetSessionLeadKey("leadKey"))
                 .Returns(new SessionRepository.QueryResult<SessionEntity>(session));
             repo.Setup(r => r.Save(It.IsAny<SessionEntity>()))
                 .Returns(new SessionRepository.UpdateResult());
 
-            var app = new SessionService(repo.Object);
+            var app = new SessionService(repo.Object, logger.Object);
 
             var result = app.LeadNarrowsSchedule("leadKey", new LeadScheduleDto()
             {
@@ -207,12 +214,13 @@ namespace WestMarchSite.Tests
             Assert.IsTrue(session.IsValid);
 
             var repo = new Mock<ISessionRepository>();
+            var logger = new Mock<ILogger<SessionService>>();
             repo.Setup(r => r.GetSessionLeadKey("leadKey"))
                 .Returns(new SessionRepository.QueryResult<SessionEntity>(session));
             repo.Setup(r => r.Save(It.IsAny<SessionEntity>()))
                 .Returns(new SessionRepository.UpdateResult(SessionRepository.UpdateResultErrors.Technical));
 
-            var app = new SessionService(repo.Object);
+            var app = new SessionService(repo.Object, logger.Object);
 
             var result = app.LeadNarrowsSchedule("leadKey", new LeadScheduleDto()
             {
@@ -239,12 +247,13 @@ namespace WestMarchSite.Tests
             Assert.IsTrue(session.IsValid);
 
             var repo = new Mock<ISessionRepository>();
+            var logger = new Mock<ILogger<SessionService>>();
             repo.Setup(r => r.GetSessionPlayerKey("playerKey"))
                 .Returns(new SessionRepository.QueryResult<SessionEntity>(session));
             repo.Setup(r => r.Save(It.IsAny<SessionEntity>()))
                 .Returns(new SessionRepository.UpdateResult());
 
-            var app = new SessionService(repo.Object);
+            var app = new SessionService(repo.Object, logger.Object);
 
             var result = app.PlayerJoinSession("playerKey", new PlayerJoinDto
             {
@@ -272,12 +281,13 @@ namespace WestMarchSite.Tests
             Assert.IsTrue(session.IsValid);
 
             var repo = new Mock<ISessionRepository>();
+            var logger = new Mock<ILogger<SessionService>>();
             repo.Setup(r => r.GetSessionPlayerKey("playerKey"))
                 .Returns(new SessionRepository.QueryResult<SessionEntity>(session));
             repo.Setup(r => r.Save(It.IsAny<SessionEntity>()))
                 .Returns(new SessionRepository.UpdateResult(SessionRepository.UpdateResultErrors.Technical));
 
-            var app = new SessionService(repo.Object);
+            var app = new SessionService(repo.Object, logger.Object);
 
             var result = app.PlayerJoinSession("playerKey", new PlayerJoinDto
             {
@@ -304,12 +314,13 @@ namespace WestMarchSite.Tests
             Assert.IsTrue(session.IsValid);
 
             var repo = new Mock<ISessionRepository>();
+            var logger = new Mock<ILogger<SessionService>>();
             repo.Setup(r => r.GetSessionPlayerKey("playerKey"))
                 .Returns(new SessionRepository.QueryResult<SessionEntity>(session));
             repo.Setup(r => r.Save(It.IsAny<SessionEntity>()))
                 .Returns(new SessionRepository.UpdateResult(SessionRepository.UpdateResultErrors.Technical));
 
-            var app = new SessionService(repo.Object);
+            var app = new SessionService(repo.Object, logger.Object);
 
             var result = app.PlayerJoinSession("playerKey", new PlayerJoinDto
             {
@@ -336,12 +347,13 @@ namespace WestMarchSite.Tests
             Assert.IsTrue(session.IsValid);
 
             var repo = new Mock<ISessionRepository>();
+            var logger = new Mock<ILogger<SessionService>>();
             repo.Setup(r => r.GetSessionHostKey("hostKey"))
                 .Returns(new SessionRepository.QueryResult<SessionEntity>(session));
             repo.Setup(r => r.Save(It.IsAny<SessionEntity>()))
                 .Returns(new SessionRepository.UpdateResult());
 
-            var app = new SessionService(repo.Object);
+            var app = new SessionService(repo.Object, logger.Object);
 
             var result = app.HostFinalizes("hostKey", new HostFinalizeDto
             {
@@ -368,12 +380,13 @@ namespace WestMarchSite.Tests
             Assert.IsTrue(session.IsValid);
 
             var repo = new Mock<ISessionRepository>();
+            var logger = new Mock<ILogger<SessionService>>();
             repo.Setup(r => r.GetSessionHostKey("hostKey"))
                 .Returns(new SessionRepository.QueryResult<SessionEntity>(session));
             repo.Setup(r => r.Save(It.IsAny<SessionEntity>()))
                 .Returns(new SessionRepository.UpdateResult(SessionRepository.UpdateResultErrors.Technical));
 
-            var app = new SessionService(repo.Object);
+            var app = new SessionService(repo.Object, logger.Object);
 
             var result = app.HostFinalizes("hostKey", new HostFinalizeDto
             {

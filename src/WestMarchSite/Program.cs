@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Text.Json.Serialization;
 
 namespace WestMarchSite
 {
@@ -14,23 +17,46 @@ namespace WestMarchSite
     {
         public static void Main(string[] args)
         {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-#if DEBUG
-                .AddJsonFile("appsettings.development.json", optional: false, reloadOnChange: true)
-#endif
-                .AddJsonFile("hosting.json", optional: false, reloadOnChange: true)
-                .Build();
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-            var host = new WebHostBuilder()
-                .UseKestrel()
-                .UseConfiguration(config)
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseStartup<Startup>()
-                .Build();
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
 
-            host.Run();
+            //do DI here
+            //Startup.ConfigureServices(builder.Services);
+            DependencyInjectionContainer.SetupDiContainer(builder.Services, builder.Configuration);
+            builder.Services.AddControllers()
+                .AddJsonOptions(o =>
+                {
+                    o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new()
+                {
+                    Title = builder.Environment.ApplicationName,
+                    Version = "v1"
+                });
+            });
+
+            var app = builder.Build();
+
+            app.UseStaticFiles();
+            app.UseRouting();
+            app.MapControllers();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(o =>
+            {
+                o.SwaggerEndpoint("/swagger/v1/swagger.json", builder.Environment.ApplicationName);
+            });
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.Run();
         }
     }
 }

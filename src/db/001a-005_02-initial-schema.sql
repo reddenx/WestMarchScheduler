@@ -12,17 +12,17 @@ create table if not exists SessionInfo
     `Description` nvarchar(2400) not null
 );
 
-create table Player
+create table if not exists Player
 (
 	`HostKey` varchar(100) not null,
     `Name` varchar(200) not null,
     `Role` varchar(20) not null
 );
 
-create table ScheduleInfo
+create table if not exists ScheduleInfo
 (
 	`HostKey` varchar(100) not null,
-    `Name` varchar(200) not null,
+    `Name` varchar(200) null,
     `Start` datetime not null,
     `End` datetime not null
 );

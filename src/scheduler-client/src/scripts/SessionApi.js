@@ -1,9 +1,18 @@
 import 'axios';
 import axios from 'axios';
 
+/**
+ * 
+ * @param {String} s 
+ * @returns {Date}
+ */
+function parseISOString(s) {
+    var b = s.split(/\D+/);
+    return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5]));
+}
+
 export class KeyBundleDto {
     /**
-     * 
      * @param {String} hostKey 
      * @param {String} leadKey 
      * @param {String} playerKey 
@@ -14,10 +23,26 @@ export class KeyBundleDto {
         this.playerKey = playerKey;
     }
 }
+export class ScheduleDatesInputDto {
+    /**
+     * @param {Date} start 
+     * @param {Date} end 
+     */
+    constructor(start, end) {
+        this.start = new Date(start);
+        this.end = new Date(end);
+    }
+}
 export class ScheduleDatesDto {
-    constructor(obj) {
-        this.start = new Date(obj.start);
-        this.end = new Date(obj.end);
+    /**
+     * @param {String} start 
+     * @param {String} end 
+     */
+    constructor(start, end) {
+        /** @type {Date} */
+        this.start = parseISOString(start);
+        /** @type {Date} */
+        this.end = parseISOString(end);
     }
 }
 export class PlayerDto {
@@ -28,7 +53,7 @@ export class PlayerDto {
         /** @type {String} */
         this.name = obj.name;
         /** @type {ScheduleDatesDto[]} */
-        this.schedule = obj.schedule && obj.schedule.map(d => new ScheduleDatesDto(d));
+        this.schedule = obj.schedule && obj.schedule.map(d => new ScheduleDatesDto(d.start, d.end));
     }
 }
 export class SessionDto {
@@ -43,8 +68,9 @@ export class SessionDto {
      * @param {*} lead 
      * @param {*} players 
      * @param {*} finalSchedule 
+     * @param {String} resolution
      */
-    constructor(playerKey, hostKey, leadKey, status, title, description, host, lead, players, finalSchedule) {
+    constructor(playerKey, hostKey, leadKey, status, title, description, host, lead, players, finalSchedule, resolution) {
         this.playerKey = playerKey;
         this.hostKey = hostKey;
         this.leadKey = leadKey;
@@ -58,7 +84,8 @@ export class SessionDto {
         /** @type {PlayerDto[]} */
         this.players = players && players.map(p => new PlayerDto(p));
         /** @type {ScheduleDatesDto[]} */
-        this.finalSchedule = finalSchedule && finalSchedule.map(d => new ScheduleDatesDto(d));
+        this.finalSchedule = finalSchedule && finalSchedule.map(d => new ScheduleDatesDto(d.start, d.end));
+        this.resolution = resolution;
     }
 }
 
@@ -75,7 +102,7 @@ export default class Api {
             let result = await axios.get('api/sessions/' + key);
             if (result.data) {
                 let d = result.data;
-                return new SessionDto(d.playerKey, d.hostKey, d.leadKey, d.status, d.title, d.description, d.host, d.lead, d.players, d.finalizedSchedule);
+                return new SessionDto(d.playerKey, d.hostKey, d.leadKey, d.status, d.title, d.description, d.host, d.lead, d.players, d.finalizedSchedule, d.resolution);
             }
             return null;
         } catch (error) {
@@ -88,14 +115,15 @@ export default class Api {
      * @param {String} name 
      * @param {String} title 
      * @param {String} description 
-     * @returns {SessionDto}
+     * @returns {KeyBundleDto}
      */
     async createSession(name, title, description) {
         try {
             let result = await axios.post('api/sessions', {
                 name: name,
                 title: title,
-                description: description
+                description: description,
+                resolution: 'hour'
             });
             if (result.data) {
                 return new KeyBundleDto(result.data.hostKey, result.data.leadKey, result.data.playerKey);
@@ -110,29 +138,81 @@ export default class Api {
      * PUT: api/session/{key}/approve
      * @param {String} key 
      * @param {String} name 
-     * @param {ScheduleDatesDto[]} schedule 
+     * @param {ScheduleDatesInputDto[]} schedule 
+     * @returns {Boolean}
      */
-    async approveSession(key, name, schedule) { }
+    async approveSession(key, name, schedule) {
+        try {
+            let result = await axios.put(`api/sessions/${key}/approve`, {
+                name: name,
+                schedule: schedule.map(s => ({
+                    start: s.start.toISOString(),
+                    end: s.end.toISOString()
+                }))
+            });
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
 
     /**
      * PUT: api/sessions/{key}/schedule
      * @param {String} key 
-     * @param {ScheduleDatesDto[]} schedule 
+     * @param {ScheduleDatesInputDto[]} schedule 
+     * @returns {Boolean}
      */
-    async leadSchedule(key, schedule) { }
+    async leadSchedule(key, schedule) {
+        try {
+            let result = await axios.put(`api/sessions/${key}/schedule`, {
+                schedule: schedule.map(s => ({
+                    start: s.start.toISOString(),
+                    end: s.end.toISOString()
+                }))
+            });
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
 
     /**
      * PUT: api/sessions/{key}/join
      * @param {String} key 
      * @param {String} name 
-     * @param {ScheduleDatesDto[]} schedule 
+     * @param {ScheduleDatesInputDto[]} schedule 
      */
-    async playerJoin(key, name, schedule) { }
+    async playerJoin(key, name, schedule) {
+        try {
+            let result = await axios.put(`api/sessions/${key}/join`, {
+                name: name,
+                schedule: schedule.map(s => ({
+                    start: s.start.toISOString(),
+                    end: s.end.toISOString()
+                }))
+            });
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
 
     /**
      * PUT: api/sessions/{key}/finalize
      * @param {String} key 
-     * @param {ScheduleDatesDto[]} schedule 
+     * @param {ScheduleDatesInputDto[]} schedule 
      */
-    async hostFinalize(key, schedule) { }
+    async hostFinalize(key, schedule) {
+        try {
+            let result = await axios.put(`api/sessions/${key}/finalize`, {
+                schedule: schedule.map(s => ({
+                    start: s.start.toISOString(),
+                    end: s.end.toISOString()
+                }))
+            });
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
 }
