@@ -44,6 +44,8 @@ namespace WestMarchSite.Infrastructure
 
                 Title = session.Title,
                 Description = session.Description,
+
+                Resolution = TranslateResolution(session.Resolution),
             };
 
             var players = new List<SessionPlayerData>();
@@ -124,6 +126,8 @@ namespace WestMarchSite.Infrastructure
                 return new UpdateResult(UpdateResultErrors.Technical);
             }
         }
+
+
 
         public QueryResult<SessionEntity> GetSessionHostKey(string hostKey)
         {
@@ -206,7 +210,7 @@ namespace WestMarchSite.Infrastructure
                 && sessionData.Description != null
                 && lead != null)
             {
-                session.SetInfo(sessionData.Title, sessionData.Description);
+                session.SetInfo(sessionData.Title, sessionData.Description, ParseResolution(sessionData.Resolution));
                 session.SetLead(lead.Name);
                 session.ProgressState();
 
@@ -249,6 +253,40 @@ namespace WestMarchSite.Infrastructure
             return session;
         }
 
+        private TimeResolutions ParseResolution(string resolution)
+        {
+            switch (resolution)
+            {
+                case "precise":
+                    return TimeResolutions.Precise;
+                case "hour":
+                    return TimeResolutions.Hour;
+                case "halfday":
+                    return TimeResolutions.HalfDay;
+                case "day":
+                    return TimeResolutions.Day;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(resolution), resolution, "could not parse db string value into TimeResolutions");
+            }
+        }
+
+        private string TranslateResolution(TimeResolutions resolution)
+        {
+            switch (resolution)
+            {
+                case TimeResolutions.Precise:
+                    return "precise";
+                case TimeResolutions.Hour:
+                    return "hour";
+                case TimeResolutions.HalfDay:
+                    return "halfday";
+                case TimeResolutions.Day:
+                    return "day";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(resolution), resolution, "could not parse db string value into TimeResolutions");
+            }
+        }
+
         private void SaveSessionData(MySqlConnection conn, SessionData sessionData)
         {
             var existingSession = GetSessionHostData(conn, sessionData.HostKey);
@@ -256,15 +294,16 @@ namespace WestMarchSite.Infrastructure
             if (existingSession == null)
             {
                 var update = @"
-insert into `SessionInfo` (`HostKey`, `LeadKey`, `PlayerKey`, `Title`, `Description`)
-values (@HostKey, @LeadKey, @PlayerKey, @Title, @Description);";
+insert into `SessionInfo` (`HostKey`, `LeadKey`, `PlayerKey`, `Title`, `Description`, `Resolution`)
+values (@HostKey, @LeadKey, @PlayerKey, @Title, @Description, @Resolution);";
                 conn.Execute(update, new
                 {
                     HostKey = sessionData.HostKey,
                     LeadKey = sessionData.LeadKey,
                     PlayerKey = sessionData.PlayerKey,
                     Title = sessionData.Title,
-                    Description = sessionData.Description
+                    Description = sessionData.Description,
+                    Resolution = sessionData.Resolution,
                 });
             }
             else
@@ -273,13 +312,15 @@ values (@HostKey, @LeadKey, @PlayerKey, @Title, @Description);";
 update `SessionInfo`
 set
 	`Title` = @Title,
-	`Description` = @Description
+	`Description` = @Description,
+    `Resolution` = @Resolution
 where `HostKey` = @HostKey;";
                 conn.Execute(insert, new
                 {
                     HostKey = sessionData.HostKey,
                     Title = sessionData.Title,
-                    Description = sessionData.Description
+                    Description = sessionData.Description,
+                    Resolution = sessionData.Resolution,
                 });
             }
 
@@ -385,7 +426,8 @@ select
     s.`LeadKey`,
     s.`PlayerKey`,
     s.`Title`,
-    s.`Description`
+    s.`Description`,
+    s.`Resolution`
 from `SessionInfo` s
 where s.`PlayerKey` = @PlayerKey";
 
@@ -401,7 +443,8 @@ select
     s.`LeadKey`,
     s.`PlayerKey`,
     s.`Title`,
-    s.`Description`
+    s.`Description`,
+    s.`Resolution`
 from `SessionInfo` s
 where s.`LeadKey` = @LeadKey";
 
@@ -417,7 +460,8 @@ select
     s.`LeadKey`,
     s.`PlayerKey`,
     s.`Title`,
-    s.`Description`
+    s.`Description`,
+    s.`Resolution`
 from `SessionInfo` s
 where s.`HostKey` = @HostKey";
 
@@ -432,6 +476,7 @@ where s.`HostKey` = @HostKey";
             public string PlayerKey { get; set; }
             public string Title { get; set; }
             public string Description { get; set; }
+            public string Resolution { get; set; }
         }
 
         private class SessionPlayerData
