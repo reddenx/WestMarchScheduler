@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-12" v-if="session">
         {{ session.status }}
-        <status-component :session="session" @reload="handleReload" />
+        <StatusComponent :session="session" @reload="handleReload" />
       </div>
     </div>
   </div>

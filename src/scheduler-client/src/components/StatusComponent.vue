@@ -25,7 +25,7 @@
             </div>
             <SetLeadScheduleComponent :session="session" v-if="session.status === 'Approved'"
               @submitted="handleLeadScheduled" />
-            <FinalizeComponent v-if="session.status === 'Open'" />
+            <FinalizeComponent v-if="session.status === 'Open'" :session="session" />
             <hr />
           </div>
 
@@ -35,7 +35,7 @@
             <div class="" v-if="session.status === 'Approved'">
               Let your organizer know that you've approved the event!
             </div>
-            <FinalizeComponent v-if="session.status === 'Open'" />
+            <FinalizeComponent v-if="session.status === 'Open'" :session="session" />
             <hr />
           </div>
 
