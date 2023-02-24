@@ -86,6 +86,14 @@ namespace WestMarchSite.Infrastructure
                     Start = d.Start,
                     End = d.End
                 }));
+            if(session.FinalizedSchedule?.Options?.Any() == true)
+                schedules.AddRange(session.FinalizedSchedule.Options.Select(d => new SessionScheduleData
+                {
+                    HostKey = session.HostKey,
+                    Name = null,
+                    Start = d.Start,
+                    End = d.End
+                }));
             if (session.Players?.Any() == true)
             {
                 foreach (var player in session.Players)
