@@ -1,0 +1,13 @@
+[Unit]
+Description=scheduler website
+After=nginx.service
+
+[Service]
+Type=simple
+User=ec2-user
+WorkingDirectory=/home/ec2-user/repos/scheduler/src/WestMarchSite/bin/Release/net6.0/linux-x64/publish
+ExecStart=/home/ec2-user/repos/scheduler/src/WestMarchSite/bin/Release/net6.0/linux-x64/publish/WestMarchSite
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
