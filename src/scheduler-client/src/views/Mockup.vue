@@ -2,6 +2,7 @@
   <div class="container">
     <div class="row">
       <div class="col-12">
+        <!-- DONE -->
         <StatusComponent :session="session" />
       </div>
       <div class="col-12">
@@ -40,8 +41,8 @@ export default {
         "hkey",
         "lkey",
         "open",
-        "session title here",
-        "a long description here",
+        "let's go get that druid compound",
+        "A long description here, sometimes people tend to write a very long description. maybe let's go to the next town over and murder a bunch of people assuming they're undead before realizing there was just an outbreak of cholera. and now have to disguise yourselves on the main road anywhere near that region",
         {
           name: "Jonk the DM",
           schedule: [
