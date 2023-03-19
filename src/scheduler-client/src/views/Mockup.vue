@@ -6,6 +6,7 @@
         <StatusComponent :session="session" />
       </div>
       <div class="col-12">
+        <!-- done enough for now -->
         <InfoComponent :session="session" />
       </div>
       <div class="col-12">
@@ -39,12 +40,12 @@ export default {
       new SessionDto(
         "pkey",
         "hkey",
-        "lkey",
+        "pkey",
         "open",
         "let's go get that druid compound",
         "A long description here, sometimes people tend to write a very long description. maybe let's go to the next town over and murder a bunch of people assuming they're undead before realizing there was just an outbreak of cholera. and now have to disguise yourselves on the main road anywhere near that region",
         {
-          name: "Jonk the DM",
+          name: "Sean",
           schedule: [
             {
               start: new Date(2023, 2, 24, 13).toISOString(),
@@ -53,7 +54,7 @@ export default {
           ],
         },
         {
-          name: "Drauno the Eager",
+          name: "Drauno",
           schedule: [
             {
               start: new Date(2023, 2, 24, 13).toISOString(),
@@ -73,6 +74,24 @@ export default {
           },
           {
             name: "Jimbo",
+            schedule: [
+              {
+                start: new Date(2023, 2, 24, 13).toISOString(),
+                end: new Date(2023, 2, 24, 17).toISOString(),
+              },
+            ],
+          },
+          {
+            name: "Himby",
+            schedule: [
+              {
+                start: new Date(2023, 2, 24, 13).toISOString(),
+                end: new Date(2023, 2, 24, 17).toISOString(),
+              },
+            ],
+          },
+          {
+            name: "Halls",
             schedule: [
               {
                 start: new Date(2023, 2, 24, 13).toISOString(),
