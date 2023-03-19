@@ -1,7 +1,6 @@
 nginxConfig=schedule.daystone.club
 nginxConfigBackup=backup_schedule.daystone.club
 
-
 # ensure running with appropriate privilages
 if [ ! "`id -u`" = 0 ]; then
     echo "Not running as root"
@@ -16,26 +15,24 @@ then
 fi
 
 # is the site already set up?
-if [ ! -f "/etc/nginx/sites-available/$nginxConfig" ];
+if [ -f "/etc/nginx/sites-available/$nginxConfig" ];
 then
-    echo "site is not already configured"
+    echo "site is already configured"
     exit 2;
 fi
 
-# copy the current site to a backup
-echo "step 1/4 backing up"
-sudo cp /etc/nginx/sites-available/$nginxConfig ./$nginxConfigBackup
 
 # copy over current configuration
-echo "step 2/4 deploying configuration"
+echo "step 1/3 deploying configuration and setting up links"
 sudo cp ./$nginxConfig /etc/nginx/sites-available/$nginxConfig
+sudo ln -s /etc/nginx/sites-available/$nginxConfig /etc/nginx/sites-enabled/$nginxConfig
 
 # test the configuration
-echo "step 3/4 testing configuration"
+echo "step 2/3 testing configuration"
 sudo nginx -t
 
 # reset nginx
-echo "step 4/4 loading configuration"
+echo "step 3/3 loading configuration"
 sudo nginx -s reload
 
 echo "deployment complete"
