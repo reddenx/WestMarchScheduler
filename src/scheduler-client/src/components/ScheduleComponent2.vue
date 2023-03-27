@@ -17,6 +17,7 @@
             unselectable: !day.selectable(hour),
             otherSelected: day.otherSelectedCount(hour) > 0,
             selected: day.selected(hour),
+            weekend: day.isWeekend
           }"
           v-for="day in days"
           :key="day.date.toISOString()"
@@ -40,6 +41,9 @@
 .selectable {
   background-color: white;
   cursor: pointer;
+}
+.weekend {
+  background-color: rgb(224, 224, 224);
 }
 .selectable:hover {
   background-color: rgb(190, 216, 255);
@@ -81,6 +85,7 @@ class DayViewmodel {
   constructor(date, startHour, endHour, selectableHours, othersSelectedHours) {
     /** @type {String} */
     this.name = days[date.getDay()];
+    this.isWeekend = weekendDays.includes(this.name);
     this.month = months[date.getMonth()];
     this.day = date.getDate();
     /** @type {Number} */
@@ -128,6 +133,7 @@ class DayViewmodel {
     //     : this.hourMap[hour];
   }
 }
+const weekendDays = ["Sun", "Sat"];
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const months = [
   "January",
