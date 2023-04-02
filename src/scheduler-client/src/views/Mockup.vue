@@ -12,8 +12,8 @@
       <div class="col-12">
         <LinksComponent :session="session" />
       </div>
-      <div class="col-12 col-lg-6">CTA HERE</div>
-      <div class="col-12 col-lg-6">
+      <div class="col-12 col-lg-6 order-lg-2">CTA HERE</div>
+      <div class="col-12 col-lg-6 order-lg-1">
         <PlayerListComponent :session="session" />
       </div>
     </div>
