@@ -61,7 +61,7 @@ export class SessionDto {
      * @param {String} playerKey
      * @param {String} hostKey 
      * @param {String} leadKey 
-     * @param {String} status 
+     * @param {String} status Posted, Approved, Open, Finalized
      * @param {String} title 
      * @param {String} description 
      * @param {*} host 

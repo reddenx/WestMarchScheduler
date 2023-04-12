@@ -5,14 +5,51 @@
         <!-- DONE -->
         <StatusComponent :session="session" />
       </div>
-      <div class="col-12">
+      <div class="col-12 mb-3">
         <!-- done enough for now -->
         <InfoComponent :session="session" />
+      </div>
+      <div class="col-12 col-lg-6 order-lg-2">
+        <div v-if="session.status == 'posted'">
+          <div v-if="session.lookupType == 'lead'">
+            Send this to your host, they'll add their schedule and you can move on
+          </div>
+          <div v-if="session.lookupType == 'host'">
+            Add your availability so the lead can pick a schedule
+          </div>
+          <div v-if="session.lookupType == 'player'">
+            Sit tight, this is still in negotiation between your leader and host
+          </div>
+        </div>
+        <div v-if="session.status == 'approved'">
+          <div v-if="session.lookupType == 'lead'">
+            Choose all your available times
+          </div>
+          <div v-if="session.lookupType == 'host'">
+            Send this to your lead, they will narrow down their available times
+          </div>
+          <div v-if="session.lookupType == 'player'">
+            Sit tight, this is still in negotiation between your leader and host
+          </div>
+        </div>
+        <div v-if="session.status == 'open'">
+          <div v-if="session.lookupType == 'lead'">
+            You can close and choose the final schedule
+          </div>
+          <div v-if="session.lookupType == 'host'">
+            Sit tight, the lead will choose the final schedule when enough players have joined
+          </div>
+          <div v-if="session.lookupType == 'player'">
+            Join Now!
+          </div>
+        </div>
+        <div v-if="session.status == 'finalized'">
+          Everything should be frozen
+        </div>
       </div>
       <div class="col-12">
         <LinksComponent :session="session" />
       </div>
-      <div class="col-12 col-lg-6 order-lg-2">CTA HERE</div>
       <div class="col-12 col-lg-6 order-lg-1">
         <PlayerListComponent :session="session" />
       </div>
@@ -38,14 +75,14 @@ export default {
   data: () => ({
     session: new SessionViewmodel(
       new SessionDto(
-        "pkey",
-        "hkey",
-        "pkey",
-        "open",
+        "playerkey",
+        "hostKey",
+        "leadKey",
+        "posted",
         "let's go get that druid compound",
         "A long description here, sometimes people tend to write a very long description. maybe let's go to the next town over and murder a bunch of people assuming they're undead before realizing there was just an outbreak of cholera. and now have to disguise yourselves on the main road anywhere near that region",
         {
-          name: "Sean",
+          name: "SeanHost",
           schedule: [
             {
               start: new Date(2023, 2, 24, 13).toISOString(),
@@ -54,7 +91,7 @@ export default {
           ],
         },
         {
-          name: "Drauno",
+          name: "DraunoLead",
           schedule: [
             {
               start: new Date(2023, 2, 24, 13).toISOString(),
@@ -103,7 +140,7 @@ export default {
         null,
         "hour"
       ),
-      "keeeyyy"
+      "leadKey"
     ),
   }),
   mounted() {},
