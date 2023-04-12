@@ -12,35 +12,35 @@
       <div class="col-12 col-lg-6 order-lg-2">
         <div v-if="session.status == 'posted'">
           <div v-if="session.lookupType == 'lead'">
-            Send this to your host, they'll add their schedule and you can move on
+            TODO TOP CALLOUT: Send this to your host, they'll add their schedule and you can move on
           </div>
           <div v-if="session.lookupType == 'host'">
-            Add your availability so the lead can pick a schedule
+            CTA: Add your availability so the lead can pick a schedule
           </div>
           <div v-if="session.lookupType == 'player'">
-            Sit tight, this is still in negotiation between your leader and host
+            TOP CALLOUT?: Sit tight, this is still in negotiation between your leader and host
           </div>
         </div>
         <div v-if="session.status == 'approved'">
           <div v-if="session.lookupType == 'lead'">
-            Choose all your available times
+            CTA: Choose all your available times
           </div>
           <div v-if="session.lookupType == 'host'">
-            Send this to your lead, they will narrow down their available times
+            TOP CALLOUT: Send this to your lead, they will narrow down their available times
           </div>
           <div v-if="session.lookupType == 'player'">
-            Sit tight, this is still in negotiation between your leader and host
+            TOP CALLOUT? Sit tight, this is still in negotiation between your leader and host
           </div>
         </div>
         <div v-if="session.status == 'open'">
           <div v-if="session.lookupType == 'lead'">
-            You can close and choose the final schedule
+            CTA: You can close and choose the final schedule
           </div>
           <div v-if="session.lookupType == 'host'">
-            Sit tight, the lead will choose the final schedule when enough players have joined
+            TOP CALLOUT? Sit tight, the lead will choose the final schedule when enough players have joined
           </div>
           <div v-if="session.lookupType == 'player'">
-            Join Now!
+            CTA: Join Now!
           </div>
         </div>
         <div v-if="session.status == 'finalized'">
