@@ -15,7 +15,8 @@ namespace WestMarchSite
         {
             services.AddSingletonImplicit<ISiteConfiguration>(config.Get<SiteConfiguration>());
 
-            services.AddSingletonImplicit<SessionRepository>();
+            // services.AddSingletonImplicit<SessionRepository>();
+            services.AddSingletonImplicit<SessionRepositoryMock>();
             services.AddSingletonImplicit<SessionService>();
             // services.AddSingletonImplicit<MicrosoftLogger<T>>();
         }
