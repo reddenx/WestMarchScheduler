@@ -284,6 +284,9 @@ export default {
       this.erasing = day.selected(hour);
       this.hourSelected(day, hour);
     },
+    touchmove(event, day, hour) {
+      //...
+    }
   },
 };
 </script>
