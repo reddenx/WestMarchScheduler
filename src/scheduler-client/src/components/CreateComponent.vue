@@ -1,6 +1,6 @@
 <template>
-  <div class="card">
-    <div class="card-body text-start">
+  <div class="">
+    <div class="text-start">
       <div class="row">
         <div class="col-12">
           <form>
