@@ -35,7 +35,7 @@ export default {
         session: SessionViewmodel,
     },
     data: () => ({
-        statuses: ["posted", "approved", "open", "finalized"],
+        statuses: ["Posted", "Approved", "Open", "Finalized"],
         statusIndex: 0,
     }),
     mounted() {

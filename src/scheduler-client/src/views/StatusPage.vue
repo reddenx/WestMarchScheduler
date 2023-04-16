@@ -16,7 +16,7 @@ import {
   PlayerViewmodel,
   ScheduleViewmodel,
 } from "../scripts/CommonModels";
-import StatusComponent from "../components/StatusComponent.vue";
+import StatusComponent from "../components/StatusComponent2.vue";
 
 const api = new Api();
 
