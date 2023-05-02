@@ -1,5 +1,4 @@
-siteConfig=site_scheduler.service
-siteConfigBackup=backup_site_scheduler.service
+. ./deploy-config.sh
 
 # sudo test
 if [ ! "`id -u`" = 0 ]; then
@@ -7,7 +6,7 @@ if [ ! "`id -u`" = 0 ]; then
     exit 2
 fi
 
-if [ ! -f "/lib/systemd/system/$siteConfig" ];
+if [ ! -f "/lib/systemd/system/$serviceDeployedFilename" ];
 then
     echo "destination not found, abandoning publish";
     exit 2;
@@ -15,13 +14,13 @@ fi
 
 # copy current install to backup file
 echo "step 1/3 backing up current version"
-sudo cp /lib/systemd/system/$siteConfig $siteConfigBackup
+sudo cp /lib/systemd/system/$serviceDeployedFilename $serviceConfigBackupFilename
 
 # disable and stop all instances
 echo "step 2/3 stopping, disabling, and removing service"
-sudo systemctl stop $siteConfig
-sudo systemctl disable $siteConfig
-sudo rm /lib/systemd/system/$siteConfig
+sudo systemctl stop $serviceDeployedFilename
+sudo systemctl disable $serviceDeployedFilename
+sudo rm /lib/systemd/system/$serviceDeployedFilename
 
 # reload configuration file
 echo "step 3/3 reload service configuration"

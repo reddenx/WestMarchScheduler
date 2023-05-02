@@ -1,5 +1,4 @@
-siteConfig=site_scheduler.service
-siteConfigBackup=backup_site_scheduler.service
+. ./deploy-config.sh
 
 # sudo test
 if [ ! "`id -u`" = 0 ]; then
@@ -8,13 +7,13 @@ if [ ! "`id -u`" = 0 ]; then
 fi
 
 # check if things are where we think they are
-if [ ! -f "./$siteConfigBackup" ];
+if [ ! -f "./$serviceConfigBackupFilename" ];
 then
     echo "backup not found, abandoning rollback";
     exit 2;
 fi
 
-if [ ! -f "/lib/systemd/system/$siteConfig" ];
+if [ ! -f "/lib/systemd/system/$serviceDeployedFilename" ];
 then
     echo "destination not found, abandoning rollback";
     exit 2;
@@ -22,7 +21,7 @@ fi
 
 # copy backup to systemd
 echo "step 1/3 deploying backup"
-sudo cp ./$siteConfigBackup /lib/systemd/system/$siteConfig
+sudo cp ./$serviceConfigBackupFilename /lib/systemd/system/$serviceDeployedFilename
 
 # reload configuration file
 echo "step 2/3 reload service configuration"
@@ -30,6 +29,6 @@ sudo systemctl daemon-reload
 
 # restart service
 echo "step 3/3 starting service"
-systemctl restart $siteConfig
+systemctl restart $serviceDeployedFilename
 
 echo "-- rollback complete --"
