@@ -4,9 +4,9 @@ After=nginx.service
 
 [Service]
 Type=simple
-User=ec2-user
-WorkingDirectory=/home/ec2-user/repos/scheduler/src/WestMarchSite/bin/Release/net6.0/linux-x64/publish
-ExecStart=/home/ec2-user/repos/scheduler/src/WestMarchSite/bin/Release/net6.0/linux-x64/publish/WestMarchSite
+User=pi
+WorkingDirectory=/home/pi/Hosting/scheduler/src/WestMarchSite/bin/Release/net6.0/linux-arm/publish
+ExecStart=/home/pi/Hosting/scheduler/src/WestMarchSite/bin/Release/net6.0/linux-arm/publish/WestMarchSite --urls "http://localhost:5003"
 Restart=always
 
 [Install]
