@@ -1,6 +1,6 @@
 {
     "Type": "release",
     "RegexMatcher": "^(v(\\d+\\.\\d+\\.\\d+))$",
-    "RepoName": "rss",
+    "RepoName": "WestMarchScheduler",
     "ScriptPath": "sh /home/pi/Hosting/scheduler/src/deploy/release-publish.sh {0} {1}"
 }
