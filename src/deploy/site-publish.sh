@@ -19,7 +19,12 @@ echo "step 1/5 client install COMPLETE"
 
 # build client app
 echo "step 2/5 client build STARTING"
-sudo -u pi npm run build --prefix $vueClientPath >> publish.log
+if [ "$#" -eq 1 ]; then
+    echo "publishing client version $1"
+    sudo -u pi npm run build --prefix $vueClientPath -- --appVersion $1 >> publish.log
+else 
+    sudo -u pi npm run build --prefix $vueClientPath >> publish.log
+fi
 echo "step 2/5 client build COMPLETE"
 
 # stop site
@@ -32,7 +37,12 @@ cd $dotnetApiPath
 
 # publishes everything
 echo "step 4/5 server build STARTING"
-sudo -u pi dotnet publish -c Release -r linux-arm >> publish.log
+if [ "$#" -eq 1 ]; then
+    echo "publishing server version $1"
+    sudo -u pi dotnet publish -c Release /property:Version=$1 -r linux-arm >> publish.log
+else 
+    sudo -u pi dotnet publish -c Release -r linux-arm >> publish.log
+fi
 echo "step 4/5 server build COMPLETE"
 
 # start site
