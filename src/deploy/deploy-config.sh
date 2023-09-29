@@ -1,6 +1,6 @@
 # nginx
 nginxLocalConfigFilename=nginx-config
-nginxAvailableSitesFilename=schedule.daystone.club-5003
+nginxAvailableSitesFilename=schedule.daystone.club-5005
 nginxConfigBackupFilename=nginx-config-backup
 
 # service
