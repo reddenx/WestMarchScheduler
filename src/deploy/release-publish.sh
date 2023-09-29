@@ -17,4 +17,4 @@ sudo -u pi git fetch
 sudo -u pi git checkout $1
 sudo -u pi git reset --hard
 
-bash ./site_publish.sh $2
+bash ./site-publish.sh $2
